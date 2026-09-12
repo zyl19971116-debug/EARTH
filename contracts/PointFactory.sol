@@ -1,0 +1,3 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24; import "./PointToken.sol";
+contract PointFactory {struct Record{address creator;address token;uint64 createdAt;string category;string imageURI;string description;}Record[] public tokens;event PointTokenCreated(address indexed token,address indexed creator,string category);function createPointToken(string calldata name,string calldata symbol,string calldata imageURI,string calldata description,string calldata category,address creator)external returns(address){PointToken token=new PointToken(name,symbol,address(this),1_000_000_000 ether);tokens.push(Record(creator,address(token),uint64(block.timestamp),category,imageURI,description));emit PointTokenCreated(address(token),creator,category);return address(token);}}

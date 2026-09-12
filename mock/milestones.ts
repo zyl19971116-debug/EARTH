@@ -1,0 +1,1 @@
+export const milestoneTokens=Array.from({length:10},(_,i)=>({id:`milestone-${i+1}`,name:["1,000,000 Users","100,000 Holders","GTA 6 Release","AI 1B Users","10M Tweets"][i%5],ticker:["1M","100K","GTA6","AI1B","10M"][i%5],metric:["Users","Holders","Community","Users","Views"][i%5],currentValue:780000-i*17000,targetValue:1000000,progress:78-i,status:"ACTIVE" as const}));

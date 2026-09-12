@@ -1,0 +1,3 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24; import "./MilestoneToken.sol";
+contract MilestoneFactory {event MilestoneTokenCreated(address indexed token,address indexed creator,string metric);function createMilestoneToken(string calldata name,string calldata symbol,string calldata description,string calldata metric,uint256 currentValue,uint256 targetValue,uint64 deadline,address creator)external returns(address){description;MilestoneToken token=new MilestoneToken(name,symbol,address(this),currentValue,targetValue,deadline,creator);emit MilestoneTokenCreated(address(token),creator,metric);return address(token);}}
