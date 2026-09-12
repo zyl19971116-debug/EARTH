@@ -195,6 +195,8 @@ const walletLogos: Record<string, string> = {
     "https://avatars.githubusercontent.com/u/1885080?s=200&v=4",
   Phantom:
     "https://mintcdn.com/phantom-e50e2e68/tU9g5MXFXgx4l6Em/resources/images/Phantom_SVG_Icon.svg",
+  "OKX Wallet":
+    "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect width='48' height='48' rx='10' fill='%23000'/%3E%3Cg fill='%23fff'%3E%3Cpath d='M8 8h9v9H8zM31 8h9v9h-9zM19.5 19.5h9v9h-9zM8 31h9v9H8zM31 31h9v9h-9z'/%3E%3C/g%3E%3C/svg%3E",
 };
 function WalletLogo({ name }: { name: string }) {
   return (
@@ -216,14 +218,13 @@ function Shell({ children }: { children: React.ReactNode }) {
         <Logo />
         <nav className={menu ? "open" : ""}>
           {[
-            "Home",
-            "Launch",
-            "Points",
-            "Milestones",
-            "Leaderboard",
-            "Explore",
-          ].map((x) => {
-            const href = x === "Home" ? "/" : `/${x.toLowerCase()}`;
+            ["Home", "/"],
+            ["Markets", "/explore"],
+            ["Rewards", "/points"],
+            ["Campaigns", "/milestones"],
+            ["Leaderboard", "/leaderboard"],
+            ["Launch", "/launch"],
+          ].map(([x, href]) => {
             return (
               <Link
                 className={path === href ? "current" : ""}
@@ -284,7 +285,7 @@ function Shell({ children }: { children: React.ReactNode }) {
               </button>
             </div>
             <p>Choose a leading wallet to enter POINTS//FUN.</p>
-            {["MetaMask", "Rabby", "Coinbase Wallet", "Phantom"].map((w) => (
+            {["MetaMask", "Rabby", "Coinbase Wallet", "Phantom", "OKX Wallet"].map((w) => (
               <button
                 className="walletrow"
                 key={w}
@@ -372,7 +373,7 @@ function HeroArt() {
       </div>
       <div className="bigcoin">
         <i>P</i>
-        <small>POINTS</small>
+        <small>TRADING POINTS</small>
         <b>
           10,000 <em>↑</em>
         </b>
@@ -403,24 +404,25 @@ function Home() {
         <section className="hero">
           <div>
             <label>
-              <Sparkles size={14} /> POINTS EVERYTHING ONCHAIN
+              <Sparkles size={14} /> TRADE · EARN · CLIMB
             </label>
             <h1>
-              Every Point
+              Every Trade
               <br />
-              Can Be a <span>Coin.</span>
+              Builds Your <span>Score.</span>
             </h1>
-            <h2>Turn any point system and milestone into a community token.</h2>
+            <h2>Earn verifiable points from the volume you create.</h2>
             <p>
-              From game points to app rewards, from user growth to historic
-              moments — create, trade and be part of the next big thing.
+              Trade participating markets, build an onchain contribution score,
+              climb each epoch and unlock project rewards. Real activity counts;
+              wash volume does not.
             </p>
             <div className="buttons">
-              <Link className="dark" href="/launch">
-                Launch a Token <ArrowRight size={17} />
+              <Link className="dark" href="/explore">
+                Start Trading <ArrowRight size={17} />
               </Link>
-              <Link className="light" href="/explore">
-                Explore Markets
+              <Link className="light" href="/points">
+                View Points Rules
               </Link>
             </div>
           </div>
@@ -428,9 +430,9 @@ function Home() {
         </section>
         <section className="features">
           {[
-            [Rocket, "Fast Launch", "Deploy in seconds"],
-            [ShieldCheck, "Fair & Transparent", "On Robinhood Chain"],
-            [Users, "Community Driven", "Built by everyone"],
+            [Rocket, "Trade to Earn", "Points from valid USD volume"],
+            [ShieldCheck, "Anti-Wash Trading", "Caps and risk controls"],
+            [Users, "Contribution Ranked", "Reward real participants"],
           ].map(([Icon, a, b]) => (
             <div key={String(a)}>
               <i>{typeof Icon !== "string" && <Icon size={19} />}</i>
@@ -463,10 +465,10 @@ function Home() {
           </div>
           <div className="sectionhead">
             <div>
-              <label>LIVE MARKETS</label>
-              <h2>Trending Tokens</h2>
+              <label>TRADING CAMPAIGNS</label>
+              <h2>Top Volume Markets</h2>
               <p>
-                The point and milestone tokens everyone is watching right now.
+                Trade eligible markets and earn contribution points every epoch.
               </p>
             </div>
             <Link href="/explore">
@@ -512,31 +514,30 @@ function Home() {
           </div>
         </section>
         <section className="manifesto">
-          <label>Turn Points Into Possibilities.</label>
+          <label>VOLUME BECOMES REPUTATION.</label>
           <h2>
-            Small points.
+            Real trades.
             <br />
-            <span>Big futures.</span>
+            <span>Measurable contribution.</span>
           </h2>
           <p>
-            Launch a fair, transparent market around the value your community
-            already creates.
+            Your score follows the value you bring—not clicks, quests or empty engagement.
           </p>
         </section>
         <section className="cta">
           <div>
-            <label>CREATE A MILESTONE</label>
+            <label>FOR PROJECTS</label>
             <h2>
-              What’s Your Next
+              Reward the Traders
               <br />
-              Milestone?
+              Who Move Your Market.
             </h2>
             <p>
-              Create a token for your goal, track the progress, and let the
-              community join the journey.
+              Launch a volume-based points campaign with transparent weights,
+              epoch caps and anti-wash rules.
             </p>
             <Link className="dark" href="/launch?type=milestone">
-              Launch a Milestone <ArrowRight />
+              Create a Campaign <ArrowRight />
             </Link>
           </div>
           <div className="ctaart">
@@ -567,18 +568,12 @@ function Launch() {
             <i>
               <Check />
             </i>
-            <label>LAUNCH COMPLETE</label>
-            <h1>Token Launched 🎉</h1>
-            <p>Your community token is live on the bonding curve.</p>
-            <div className="address">
-              <code>0x7F28...9A41</code>
-              <button onClick={() => toast.success("Address copied")}>
-                <Copy />
-              </button>
-            </div>
+            <label>CAMPAIGN DRAFT READY</label>
+            <h1>Points Campaign Created</h1>
+            <p>Connect the campaign contract and indexer before activation.</p>
             <div className="buttons">
               <Link className="dark" href="/token/0xgxp">
-                View Token
+                View Campaign
               </Link>
               <button className="light">Share on X</button>
             </div>
@@ -590,9 +585,9 @@ function Launch() {
     <Shell>
       <main className="page">
         <Title
-          eyebrow="CREATE ONCHAIN"
-          title="Launch Your Token"
-          text="Turn a point system or milestone into a community-owned market."
+          eyebrow="PROJECT REWARDS"
+          title="Launch a Trading Campaign"
+          text="Define how valid volume becomes points for your traders."
         />
         <div className="types">
           <button
@@ -601,7 +596,7 @@ function Launch() {
           >
             <i>P</i>
             <b>
-              POINT <small>Tokenize a point system</small>
+              VOLUME <small>Reward eligible trading volume</small>
             </b>
           </button>
           <button
@@ -612,7 +607,7 @@ function Launch() {
               <TrendingUp />
             </i>
             <b>
-              MILESTONE <small>Turn a goal into momentum</small>
+              MILESTONE <small>Add community bonus goals</small>
             </b>
           </button>
         </div>
@@ -627,26 +622,26 @@ function Launch() {
               <label>{type.toUpperCase()} LAUNCH</label>
               <h2>
                 {type === "point"
-                  ? "Create a Point Token"
-                  : "Create a Milestone"}
+                  ? "Configure Trading Points"
+                  : "Create a Volume Milestone"}
               </h2>
             </div>
             <span>01 — DETAILS</span>
           </div>
           <div className="formgrid">
             <Field
-              name={type === "point" ? "Point Name" : "Milestone Name"}
-              placeholder={type === "point" ? "Hyperliquid Points" : "10M Onchain Traders"}
+              name={type === "point" ? "Campaign Name" : "Milestone Name"}
+              placeholder={type === "point" ? "Season 1 Trading Rewards" : "$10M Valid Volume"}
             />
             <Field
-              name="Ticker"
-              placeholder={type === "point" ? "HYPE" : "10M"}
+              name="Points Symbol"
+              placeholder={type === "point" ? "XP" : "VOL10M"}
             />
             <label className="full">
               Description
               <textarea
                 required
-                placeholder="Tell the community what this represents..."
+                placeholder="Explain eligible markets, rewards and epoch dates..."
               />
             </label>
             <label>
@@ -666,8 +661,8 @@ function Launch() {
               </select>
             </label>
             <Field
-              name="Current Value"
-              placeholder={type === "point" ? "10,000" : "780000"}
+              name={type === "point" ? "Points per $1 buy" : "Current Volume"}
+              placeholder={type === "point" ? "1" : "7800000"}
             />
             {type === "milestone" && (
               <>
@@ -684,16 +679,15 @@ function Launch() {
           <div className="curvenote">
             <BarChart3 />
             <p>
-              <b>Fair bonding curve launch</b>
+              <b>Transparent contribution scoring</b>
               <small>
-                Trading begins immediately. Liquidity migrates automatically at
-                graduation.
+                Buy volume earns 1×, sell volume earns 0.7×. Risk checks run before settlement.
               </small>
             </p>
-            <strong>$30K GRADUATION</strong>
+            <strong>EPOCH SETTLEMENT</strong>
           </div>
           <button className="dark submit">
-            {type === "point" ? "Launch Token" : "Launch Milestone"}
+            {type === "point" ? "Create Campaign" : "Create Milestone"}
             <ArrowRight />
           </button>
         </form>
@@ -708,6 +702,99 @@ function Field({ name, placeholder }: { name: string; placeholder: string }) {
       <input required placeholder={placeholder} />
     </label>
   );
+}
+const POINTS_RULES = {
+  buyWeight: 1,
+  sellWeight: 0.7,
+  maxActivityMultiplier: 1.3,
+  maxHoldingMultiplier: 1.2,
+  dailyCap: 100_000,
+};
+
+function calculateTradingPoints(
+  buyVolume: number,
+  sellVolume: number,
+  activeDays: number,
+  holdingDays: number,
+) {
+  const validVolume =
+    Math.max(0, buyVolume) * POINTS_RULES.buyWeight +
+    Math.max(0, sellVolume) * POINTS_RULES.sellWeight;
+  const activityMultiplier = Math.min(
+    POINTS_RULES.maxActivityMultiplier,
+    1 + Math.max(0, activeDays - 1) * 0.02,
+  );
+  const holdingMultiplier = Math.min(
+    POINTS_RULES.maxHoldingMultiplier,
+    1 + Math.max(0, holdingDays) * 0.005,
+  );
+  return Math.floor(
+    Math.min(
+      POINTS_RULES.dailyCap,
+      validVolume * activityMultiplier * holdingMultiplier,
+    ),
+  );
+}
+
+function PointsProgram() {
+  const [buyVolume, setBuyVolume] = useState("1000");
+  const [sellVolume, setSellVolume] = useState("500");
+  const [activeDays, setActiveDays] = useState("7");
+  const [holdingDays, setHoldingDays] = useState("14");
+  const points = calculateTradingPoints(
+    Number(buyVolume),
+    Number(sellVolume),
+    Number(activeDays),
+    Number(holdingDays),
+  );
+  return (
+    <Shell>
+      <main className="page">
+        <Title
+          eyebrow="TRADING CONTRIBUTION"
+          title="Trade More. Earn More."
+          text="Points are calculated from each wallet's valid trading volume inside POINTS//FUN."
+        />
+        <section className="pointsrules">
+          <div className="ruleintro">
+            <label>POINTS FORMULA</label>
+            <h2>Valid volume × activity × holding</h2>
+            <p>
+              Every $1 of valid buy volume earns 1 base point. Sell volume earns
+              0.7 points per $1. Activity and holding can boost the result, while
+              daily caps and wash-trading filters protect fairness.
+            </p>
+            <div className="rulegrid">
+              <div><small>BUY WEIGHT</small><b>1.0×</b></div>
+              <div><small>SELL WEIGHT</small><b>0.7×</b></div>
+              <div><small>MAX BOOST</small><b>1.56×</b></div>
+              <div><small>DAILY CAP</small><b>100K</b></div>
+            </div>
+          </div>
+          <div className="pointscalc">
+            <label>POINTS ESTIMATOR</label>
+            <div className="calcgrid">
+              <FieldNumber label="Buy volume (USD)" value={buyVolume} setValue={setBuyVolume} />
+              <FieldNumber label="Sell volume (USD)" value={sellVolume} setValue={setSellVolume} />
+              <FieldNumber label="Active days" value={activeDays} setValue={setActiveDays} />
+              <FieldNumber label="Holding days" value={holdingDays} setValue={setHoldingDays} />
+            </div>
+            <div className="pointtotal"><small>ESTIMATED POINTS</small><strong>{points.toLocaleString()}</strong></div>
+            <p className="calcnotice">Final points use indexed onchain trades after risk checks.</p>
+          </div>
+        </section>
+        <section className="pointsnotes">
+          <div><b>01 · Valid volume</b><p>Only settled trades made through POINTS//FUN count.</p></div>
+          <div><b>02 · Anti-abuse</b><p>Self-trades, rapid round trips and linked-wallet wash volume are excluded.</p></div>
+          <div><b>03 · Settlement</b><p>Scores settle by wallet each epoch and power rankings and rewards.</p></div>
+        </section>
+      </main>
+    </Shell>
+  );
+}
+
+function FieldNumber({ label, value, setValue }: { label: string; value: string; setValue: (value: string) => void }) {
+  return <label>{label}<input min="0" type="number" value={value} onChange={(e) => setValue(e.target.value)} /></label>;
 }
 function Title({
   eyebrow,
@@ -736,8 +823,8 @@ function Explore({ mile = false }: { mile?: boolean }) {
           title={mile ? "Explore Milestones" : "Explore Points"}
           text={
             mile
-              ? "Turn Goals Into Markets."
-              : "Discover the point systems becoming community economies."
+              ? "Track shared trading goals and bonus unlocks."
+              : "Compare eligible markets by activity and reward potential."
           }
         />
         <div className="tabs">
@@ -791,6 +878,8 @@ function Explore({ mile = false }: { mile?: boolean }) {
 function TokenPage() {
   const [side, setSide] = useState("BUY"),
     [amt, setAmt] = useState("0.5");
+  const usdVolume = Number(amt || 0) * 3200;
+  const estimatedPoints = Math.floor(usdVolume * (side === "BUY" ? 1 : 0.7));
   return (
     <Shell>
       <main className="page">
@@ -812,9 +901,9 @@ function TokenPage() {
             ["Market Cap", "$1.24M"],
             ["Price", "$0.00412"],
             ["24H", "+128.5%"],
-            ["Volume", "$284.9K"],
+            ["Eligible Volume", "$284.9K"],
             ["Holders", "4,821"],
-            ["Transactions", "18,420"],
+            ["Points Issued", "1.82M"],
           ].map((x) => (
             <div key={x[0]}>
               <small>{x[0]}</small>
@@ -904,11 +993,16 @@ function TokenPage() {
               <small>You receive</small>
               <b>≈ {(Number(amt || 0) * 24271).toLocaleString()} HYPE</b>
             </p>
+            <div className="earnpreview">
+              <span><Sparkles size={16} /> Estimated contribution</span>
+              <strong>+{estimatedPoints.toLocaleString()} PTS</strong>
+              <small>Final score settles after onchain risk checks.</small>
+            </div>
             <button
               className={`dark submit ${side === "SELL" ? "danger" : ""}`}
-              onClick={() => toast.success(`${side} order simulated`)}
+              onClick={() => toast.error("Connect the live trading contract to submit this transaction.")}
             >
-              {side} $HYPE
+              CONNECT CONTRACT TO {side}
             </button>
           </aside>
         </div>
@@ -917,18 +1011,18 @@ function TokenPage() {
   );
 }
 function Leaderboard() {
-  const [tab, setTab] = useState("TOKENS");
+  const [tab, setTab] = useState("TRADERS");
   return (
     <Shell>
       <main className="page">
         <Title
           eyebrow="COMMUNITY SIGNAL"
           title="Leaderboard"
-          text="The points, goals and builders shaping the market."
+          text="Ranked by settled contribution points from valid trading volume."
         />
         <section className="leader">
           <div className="tabs">
-            {["TOKENS", "MILESTONES", "CREATORS"].map((x) => (
+            {["TRADERS", "MARKETS", "EPOCHS"].map((x) => (
               <button
                 className={tab === x ? "active" : ""}
                 onClick={() => setTab(x)}
@@ -942,15 +1036,15 @@ function Leaderboard() {
             <div className="row head">
               <span>Rank</span>
               <span>
-                {tab === "CREATORS"
+                {tab === "TRADERS"
                   ? "Wallet"
-                  : tab === "MILESTONES"
-                    ? "Milestone"
+                  : tab === "EPOCHS"
+                    ? "Epoch"
                     : "Token"}
               </span>
-              <span>Market Cap</span>
-              <span>Volume</span>
-              <span>24H</span>
+              <span>Valid Volume</span>
+              <span>Points</span>
+              <span>Boost</span>
             </div>
             {Array.from({ length: 10 }, (_, i) => {
               const t = tokens[i % 8];
@@ -960,19 +1054,19 @@ function Leaderboard() {
                   <span className="who">
                     <i style={{ background: t.color }}>{t.ticker[0]}</i>
                     <b>
-                      {tab === "CREATORS"
+                      {tab === "TRADERS"
                         ? `0x${83 + i}...${832 - i}`
-                        : tab === "MILESTONES"
-                          ? milestones[i % 5].name
+                        : tab === "EPOCHS"
+                          ? `Season 1 · Epoch ${10 - i}`
                           : t.name}
                     </b>
                     <small>
-                      {tab === "CREATORS" ? "Verified creator" : `$${t.ticker}`}
+                      {tab === "TRADERS" ? `${12 - (i % 5)} active days` : `$${t.ticker}`}
                     </small>
                   </span>
-                  <span>{t.cap}</span>
-                  <span>${284 - i * 13}K</span>
-                  <strong>+{128 - i * 7}.5%</strong>
+                  <span>${(284 - i * 13).toLocaleString()}K</span>
+                  <span>{(248900 - i * 13740).toLocaleString()}</span>
+                  <strong>{(1.3 - i * .03).toFixed(2)}×</strong>
                 </div>
               );
             })}
@@ -987,18 +1081,18 @@ function Profile() {
     <Shell>
       <main className="page">
         <Title
-          eyebrow="CREATOR PROFILE"
+          eyebrow="TRADER PROFILE"
           title="0x83...832"
-          text="Building point economies for communities onchain."
+          text="Contribution history calculated from settled POINTS//FUN trades."
         />
         <div className="stats">
           {[
-            ["Tokens Created", "14"],
-            ["Total Market Cap", "$4.2M"],
-            ["All-time Volume", "$980K"],
-            ["Followers", "2,418"],
-            ["Joined", "Aug 2026"],
-            ["Reputation", "98.4"],
+            ["Total Points", "248,900"],
+            ["Valid Volume", "$284K"],
+            ["Current Rank", "#12"],
+            ["Active Days", "18"],
+            ["Holding Boost", "1.12×"],
+            ["Risk Status", "Clear"],
           ].map((x) => (
             <div key={x[0]}>
               <small>{x[0]}</small>
@@ -1020,7 +1114,7 @@ function Footer() {
     <footer>
       <div>
         <Logo />
-        <p>Every Point Can Be a Coin.</p>
+        <p>Every Trade Builds Your Score.</p>
       </div>
       <div>
         {["Explore", "Launch", "Points", "Milestones", "Leaderboard"].map(
@@ -1032,7 +1126,7 @@ function Footer() {
         )}
       </div>
       <div>
-        Built on Robinhood Chain<small>● Live on testnet</small>
+        Volume-weighted onchain rewards<small>Epoch-based settlement</small>
       </div>
     </footer>
   );
@@ -1075,7 +1169,8 @@ export default function App() {
     return () => controller.abort();
   }, []);
   if (p === "/launch") return <Launch />;
-  if (p === "/points" || p === "/explore") return <Explore />;
+  if (p === "/points") return <PointsProgram />;
+  if (p === "/explore") return <Explore />;
   if (p === "/milestones") return <Explore mile />;
   if (p === "/leaderboard") return <Leaderboard />;
   if (p.startsWith("/token/")) return <TokenPage />;
