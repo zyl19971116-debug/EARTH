@@ -1,10 +1,11 @@
 "use client";
-import Link from "next/link";
 import {useEffect,useState} from "react";
 import {ArrowRight,BarChart3,Check,ChevronRight,Copy,Heart,Menu,Rocket,Search,ShieldCheck,Sparkles,TrendingUp,Users,Wallet,X} from "lucide-react";
 import {Area,AreaChart,ResponsiveContainer} from "recharts";
 import {toast,Toaster} from "sonner";
 import {usePathname,useRouter} from "next/navigation";
+
+function Link({href,children,...props}:{href:string;children:React.ReactNode}&React.AnchorHTMLAttributes<HTMLAnchorElement>){return <a href={href} {...props}>{children}</a>}
 
 type Token={name:string;ticker:string;category:string;cap:string;change:string;color:string;data:number[];address:string};
 const tokens:Token[]=[
