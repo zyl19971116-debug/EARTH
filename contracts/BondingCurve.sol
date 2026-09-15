@@ -27,6 +27,7 @@ contract BondingCurve {
     address public immutable buybackRecipient;
     IEarthBuybackExecutor public immutable buybackExecutor;
     address public owner;
+    address public factory;
 
     mapping(address => uint256) public virtualEthReserve;
     mapping(address => uint256) public virtualTokenReserve;
@@ -40,6 +41,7 @@ contract BondingCurve {
     event Graduated(address indexed token);
 
     modifier onlyOwner() { require(msg.sender == owner, "owner"); _; }
+    modifier onlyOwnerOrFactory() { require(msg.sender == owner || msg.sender == factory, "configurator"); _; }
     modifier nonReentrant() { require(locked == 1, "reentrancy"); locked = 2; _; locked = 1; }
 
     constructor(
@@ -63,13 +65,21 @@ contract BondingCurve {
     }
 
     /// @notice EARTH 2% tax: 50% buyback, 50% main community.
-    function configureEarth(uint256 ethReserve, uint256 tokenReserve) external onlyOwner {
+    function setFactory(address factory_) external onlyOwner {
+        require(factory == address(0), "factory already set");
+        require(factory_ != address(0), "factory");
+        factory = factory_;
+    }
+
+    function configureEarth(uint256 ethReserve, uint256 tokenReserve) external payable onlyOwner {
+        require(msg.value == ethReserve, "seed value");
         _configure(earthToken, TokenType.Earth, address(0), ethReserve, tokenReserve);
     }
 
     /// @notice City 2% tax: 50% EARTH buyback, 30% city community,
     /// 20% main community.
-    function configureCity(address token, address cityDevWallet, uint256 ethReserve, uint256 tokenReserve) external onlyOwner {
+    function configureCity(address token, address cityDevWallet, uint256 ethReserve, uint256 tokenReserve) external payable onlyOwnerOrFactory {
+        require(msg.value == ethReserve, "seed value");
         require(token != earthToken, "earth is main token");
         require(cityDevWallet != address(0), "city dev");
         _configure(token, TokenType.City, cityDevWallet, ethReserve, tokenReserve);
