@@ -456,8 +456,8 @@ function Home() {
           <ArrowRight className="splitarrow" />
           <div className="splitcard community">
             <small>CITY TOKENS</small>
-            <strong>50% · 30% · 20%</strong>
-            <p>50% buys $EARTH, 30% funds the city creator DEV, and 20% funds the main DEV wallet.</p>
+            <strong>50% Buyback · 30% City · 20% Main</strong>
+            <p>50% buys back $EARTH, 30% supports city creator community building, and 20% supports main-token creator community building.</p>
           </div>
         </section>
         <section className="market">
@@ -701,7 +701,7 @@ function Launch() {
             <p>
               <b>Fee split enforced by contract</b>
               <small>
-                50% buys $EARTH, 30% funds the city DEV, and 20% funds the main DEV wallet.
+                50% buys back $EARTH, 30% supports city creator community building, and 20% supports main-token creator community building.
               </small>
             </p>
             <strong>50 / 30 / 20</strong>
@@ -964,8 +964,8 @@ function TokenPage() {
             <div className="feebreakdown">
               <div><span>Protocol fee (1%)</span><b>{protocolFee.toFixed(4)} ETH</b></div>
               <div><span>50% → $EARTH buyback</span><b>{(protocolFee / 2).toFixed(4)} ETH</b></div>
-              <div><span>30% → City creator DEV</span><b>{(protocolFee * .3).toFixed(4)} ETH</b></div>
-              <div><span>20% → Main token DEV</span><b>{(protocolFee * .2).toFixed(4)} ETH</b></div>
+              <div><span>30% → City creator community</span><b>{(protocolFee * .3).toFixed(4)} ETH</b></div>
+              <div><span>20% → Main-token creator community</span><b>{(protocolFee * .2).toFixed(4)} ETH</b></div>
             </div>
             <button
               className={`dark submit ${side === "SELL" ? "danger" : ""}`}
