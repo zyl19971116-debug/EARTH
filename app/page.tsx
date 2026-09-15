@@ -54,24 +54,28 @@ type LaunchCity = {
   region: "Europe" | "North America" | "South America";
   landmark: string;
   icon: string;
+  rank: number;
 };
 
 const launchCities: LaunchCity[] = [
-  { name: "Lisbon", ticker: "LIS", region: "Europe", landmark: "Belém Tower", icon: "🏰" },
-  { name: "Rome", ticker: "ROM", region: "Europe", landmark: "Colosseum", icon: "🏛️" },
-  { name: "Amsterdam", ticker: "AMS", region: "Europe", landmark: "Canal Houses", icon: "🏘️" },
-  { name: "Barcelona", ticker: "BCN", region: "Europe", landmark: "Sagrada Família", icon: "⛪" },
-  { name: "Prague", ticker: "PRG", region: "Europe", landmark: "Charles Bridge", icon: "🌉" },
-  { name: "Vienna", ticker: "VIE", region: "Europe", landmark: "Schönbrunn Palace", icon: "🏰" },
-  { name: "San Francisco", ticker: "SFO", region: "North America", landmark: "Golden Gate Bridge", icon: "🌉" },
-  { name: "Chicago", ticker: "CHI", region: "North America", landmark: "Willis Tower", icon: "🏙️" },
-  { name: "Toronto", ticker: "TOR", region: "North America", landmark: "CN Tower", icon: "🗼" },
-  { name: "Mexico City", ticker: "MEX", region: "North America", landmark: "Angel of Independence", icon: "🪽" },
-  { name: "Vancouver", ticker: "YVR", region: "North America", landmark: "Canada Place", icon: "⛵" },
-  { name: "Rio de Janeiro", ticker: "RIO", region: "South America", landmark: "Christ the Redeemer", icon: "🗿" },
-  { name: "Buenos Aires", ticker: "BUE", region: "South America", landmark: "Obelisk", icon: "🏛️" },
-  { name: "Santiago", ticker: "SCL", region: "South America", landmark: "Gran Torre Santiago", icon: "🏙️" },
-  { name: "Lima", ticker: "LIM", region: "South America", landmark: "Plaza Mayor", icon: "⛲" },
+  { name: "Istanbul", ticker: "IST", region: "Europe", landmark: "Hagia Sophia", icon: "🕌", rank: 1 },
+  { name: "Moscow", ticker: "MOW", region: "Europe", landmark: "Saint Basil's Cathedral", icon: "⛪", rank: 2 },
+  { name: "London", ticker: "LDN", region: "Europe", landmark: "Big Ben", icon: "🕰️", rank: 3 },
+  { name: "Paris", ticker: "PAR", region: "Europe", landmark: "Eiffel Tower", icon: "🗼", rank: 4 },
+  { name: "Madrid", ticker: "MAD", region: "Europe", landmark: "Puerta de Alcalá", icon: "🏛️", rank: 5 },
+  { name: "Barcelona", ticker: "BCN", region: "Europe", landmark: "Sagrada Família", icon: "⛪", rank: 6 },
+  { name: "Mexico City", ticker: "MEX", region: "North America", landmark: "Angel of Independence", icon: "🪽", rank: 1 },
+  { name: "New York City", ticker: "NYC", region: "North America", landmark: "Statue of Liberty", icon: "🗽", rank: 2 },
+  { name: "Los Angeles", ticker: "LAX", region: "North America", landmark: "Hollywood Sign", icon: "🎬", rank: 3 },
+  { name: "Toronto", ticker: "TOR", region: "North America", landmark: "CN Tower", icon: "🗼", rank: 4 },
+  { name: "Santo Domingo", ticker: "SDQ", region: "North America", landmark: "Columbus Lighthouse", icon: "🏛️", rank: 5 },
+  { name: "Guadalajara", ticker: "GDL", region: "North America", landmark: "Guadalajara Cathedral", icon: "⛪", rank: 6 },
+  { name: "São Paulo", ticker: "SAO", region: "South America", landmark: "Altino Arantes Building", icon: "🏙️", rank: 1 },
+  { name: "Buenos Aires", ticker: "BUE", region: "South America", landmark: "Obelisk", icon: "🏛️", rank: 2 },
+  { name: "Bogotá", ticker: "BOG", region: "South America", landmark: "Monserrate", icon: "⛰️", rank: 3 },
+  { name: "Lima", ticker: "LIM", region: "South America", landmark: "Plaza Mayor", icon: "⛲", rank: 4 },
+  { name: "Rio de Janeiro", ticker: "RIO", region: "South America", landmark: "Christ the Redeemer", icon: "🗿", rank: 5 },
+  { name: "Santiago", ticker: "SCL", region: "South America", landmark: "Gran Torre Santiago", icon: "🏙️", rank: 6 },
 ];
 const tokens: Token[] = [
   [
@@ -679,7 +683,7 @@ function Launch() {
             {availableCities.map((city) => (
               <button type="button" key={city.ticker} className={selectedTicker === city.ticker ? "active" : ""} onClick={() => setSelectedTicker(city.ticker)}>
                 <span className="cityavatar" aria-hidden="true">{city.icon}</span>
-                <span><b>{city.name}</b><small>{city.landmark}</small></span>
+                <span><b>#{city.rank} {city.name}</b><small>{city.landmark}</small></span>
                 <strong>${city.ticker}</strong>
               </button>
             ))}
