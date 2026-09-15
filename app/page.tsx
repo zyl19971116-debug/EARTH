@@ -6,6 +6,8 @@ import {
   Check,
   ChevronRight,
   Heart,
+  Landmark,
+  MapPin,
   Menu,
   Rocket,
   Search,
@@ -45,6 +47,32 @@ type Token = {
   data: number[];
   address: string;
 };
+
+type LaunchCity = {
+  name: string;
+  ticker: string;
+  region: "Europe" | "North America" | "South America";
+  landmark: string;
+  icon: string;
+};
+
+const launchCities: LaunchCity[] = [
+  { name: "Lisbon", ticker: "LIS", region: "Europe", landmark: "Belém Tower", icon: "🏰" },
+  { name: "Rome", ticker: "ROM", region: "Europe", landmark: "Colosseum", icon: "🏛️" },
+  { name: "Amsterdam", ticker: "AMS", region: "Europe", landmark: "Canal Houses", icon: "🏘️" },
+  { name: "Barcelona", ticker: "BCN", region: "Europe", landmark: "Sagrada Família", icon: "⛪" },
+  { name: "Prague", ticker: "PRG", region: "Europe", landmark: "Charles Bridge", icon: "🌉" },
+  { name: "Vienna", ticker: "VIE", region: "Europe", landmark: "Schönbrunn Palace", icon: "🏰" },
+  { name: "San Francisco", ticker: "SFO", region: "North America", landmark: "Golden Gate Bridge", icon: "🌉" },
+  { name: "Chicago", ticker: "CHI", region: "North America", landmark: "Willis Tower", icon: "🏙️" },
+  { name: "Toronto", ticker: "TOR", region: "North America", landmark: "CN Tower", icon: "🗼" },
+  { name: "Mexico City", ticker: "MEX", region: "North America", landmark: "Angel of Independence", icon: "🪽" },
+  { name: "Vancouver", ticker: "YVR", region: "North America", landmark: "Canada Place", icon: "⛵" },
+  { name: "Rio de Janeiro", ticker: "RIO", region: "South America", landmark: "Christ the Redeemer", icon: "🗿" },
+  { name: "Buenos Aires", ticker: "BUE", region: "South America", landmark: "Obelisk", icon: "🏛️" },
+  { name: "Santiago", ticker: "SCL", region: "South America", landmark: "Gran Torre Santiago", icon: "🏙️" },
+  { name: "Lima", ticker: "LIM", region: "South America", landmark: "Plaza Mayor", icon: "⛲" },
+];
 const tokens: Token[] = [
   [
     "New York City",
@@ -578,8 +606,22 @@ function Home() {
   );
 }
 function Launch() {
-  const [type, setType] = useState("point"),
+  const [region, setRegion] = useState<LaunchCity["region"]>("Europe"),
+    [selectedTicker, setSelectedTicker] = useState(""),
+    [locallyLaunched, setLocallyLaunched] = useState<string[]>([]),
     [done, setDone] = useState(false);
+  useEffect(() => {
+    try {
+      setLocallyLaunched(JSON.parse(localStorage.getItem("earth-launched-cities") || "[]"));
+    } catch {
+      setLocallyLaunched([]);
+    }
+  }, []);
+  const published = new Set([...tokens.map((token) => token.ticker), ...locallyLaunched]);
+  const availableCities = launchCities.filter(
+    (city) => city.region === region && !published.has(city.ticker),
+  );
+  const selectedCity = launchCities.find((city) => city.ticker === selectedTicker);
   if (done)
     return (
       <Shell>
@@ -609,54 +651,50 @@ function Launch() {
           title="Launch a City Token"
           text="Put any city onchain and open its community-owned market."
         />
-        <div className="types">
-          <button
-            className={type === "point" ? "active" : ""}
-            onClick={() => setType("point")}
-          >
-            <i>P</i>
-            <b>
-              CITY <small>Create a city community token</small>
-            </b>
-          </button>
-          <button
-            className={type === "milestone" ? "active" : ""}
-            onClick={() => setType("milestone")}
-          >
-            <i>
-              <TrendingUp />
-            </i>
-            <b>
-              DISTRICT <small>Launch a neighborhood or district</small>
-            </b>
-          </button>
-        </div>
         <form
           onSubmit={(e) => {
             e.preventDefault();
+            if (!selectedCity) return;
+            const next = [...new Set([...locallyLaunched, selectedCity.ticker])];
+            localStorage.setItem("earth-launched-cities", JSON.stringify(next));
+            setLocallyLaunched(next);
             setDone(true);
           }}
         >
           <div className="formhead">
             <div>
-              <label>{type.toUpperCase()} LAUNCH</label>
-              <h2>
-                {type === "point"
-                  ? "Configure Your City"
-                  : "Configure Your District"}
-              </h2>
+              <label>CITY TOKEN LAUNCH</label>
+              <h2>Choose an Available City</h2>
             </div>
-            <span>01 — DETAILS</span>
+            <span>01 — CITY</span>
           </div>
+          <div className="regionpicker" role="group" aria-label="Choose a launch region">
+            {(["Europe", "North America", "South America"] as const).map((item) => (
+              <button type="button" className={region === item ? "active" : ""} onClick={() => { setRegion(item); setSelectedTicker(""); }} key={item}>
+                <MapPin size={15} /> {item}
+              </button>
+            ))}
+          </div>
+          <div className="citypicker">
+            {availableCities.map((city) => (
+              <button type="button" key={city.ticker} className={selectedTicker === city.ticker ? "active" : ""} onClick={() => setSelectedTicker(city.ticker)}>
+                <span className="cityavatar" aria-hidden="true">{city.icon}</span>
+                <span><b>{city.name}</b><small>{city.landmark}</small></span>
+                <strong>${city.ticker}</strong>
+              </button>
+            ))}
+            {!availableCities.length && <div className="cityempty">All cities in this region have already launched.</div>}
+          </div>
+          {selectedCity && (
+            <div className="selectedcity">
+              <span className="cityavatar large" aria-hidden="true">{selectedCity.icon}</span>
+              <div><small>AUTO-GENERATED TOKEN AVATAR</small><b>{selectedCity.name} · {selectedCity.landmark}</b></div>
+              <Landmark />
+            </div>
+          )}
           <div className="formgrid">
-            <Field
-              name={type === "point" ? "City Name" : "District Name"}
-              placeholder={type === "point" ? "Lisbon" : "Brooklyn"}
-            />
-            <Field
-              name="Ticker"
-              placeholder={type === "point" ? "SHA" : "PDG"}
-            />
+            <label>City Name<input required readOnly value={selectedCity?.name || "Select a city above"} /></label>
+            <label>Ticker<input required readOnly value={selectedCity ? `$${selectedCity.ticker}` : "Generated automatically"} /></label>
             <label className="full">
               Description
               <textarea
@@ -664,31 +702,8 @@ function Launch() {
                 placeholder="Describe the city community and how its treasury will be used..."
               />
             </label>
-            <label>
-              {type === "point" ? "Region" : "City"}
-              <select>
-                {[
-                  "Europe",
-                  "North America",
-                  "South America",
-                ].map((x) => (
-                  <option key={x}>{x}</option>
-                ))}
-              </select>
-            </label>
-            <Field
-              name={type === "point" ? "Total Supply" : "Population"}
-              placeholder={type === "point" ? "1000000000" : "780"}
-            />
-            {type === "milestone" && (
-              <>
-                <Field name="Target Value" placeholder="1000000" />
-                <label>
-                  Deadline <small>Optional</small>
-                  <input type="date" />
-                </label>
-              </>
-            )}
+            <label>Region<input readOnly value={selectedCity?.region || region} /></label>
+            <Field name="Total Supply" placeholder="1000000000" />
             <Field name="Website" placeholder="https://" />
             <Field name="X / Twitter" placeholder="@handle" />
             <label className="full">
@@ -706,8 +721,8 @@ function Launch() {
             </p>
             <strong>50 / 30 / 20</strong>
           </div>
-          <button className="dark submit">
-            {type === "point" ? "Launch City Token" : "Launch District"}
+          <button className="dark submit" disabled={!selectedCity}>
+            {selectedCity ? `Launch $${selectedCity.ticker}` : "Choose a City to Continue"}
             <ArrowRight />
           </button>
         </form>
