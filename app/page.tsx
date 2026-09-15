@@ -431,7 +431,7 @@ function Home() {
           {[
             [Rocket, "Launch Any City", "One city, one community token"],
             [ShieldCheck, "Europe & Americas", "The first regions now live"],
-            [Users, "50 / 50 Flywheel", "Buyback plus community building"],
+            [Users, "Shared Development", "City DEV and main DEV both funded"],
           ].map(([Icon, a, b]) => (
             <div key={String(a)}>
               <i>{typeof Icon !== "string" && <Icon size={19} />}</i>
@@ -445,19 +445,19 @@ function Home() {
         <section className="flywheel">
           <div className="flytitle">
             <label>PROTOCOL FLYWHEEL</label>
-            <h2>Every fee goes back into the world.</h2>
-            <p>A 1% trading fee is split automatically and transparently.</p>
+            <h2>Two tokens. Two transparent fee routes.</h2>
+            <p>Every trading fee strengthens $EARTH and funds community development.</p>
           </div>
           <div className="splitcard buyback">
-            <small>50% OF FEES</small>
-            <strong>$EARTH Buyback</strong>
-            <p>Automatically buys the main ecosystem token from the market.</p>
+            <small>$EARTH MAIN TOKEN</small>
+            <strong>50% Buyback · 50% Main DEV</strong>
+            <p>Half supports market buybacks; half funds the main ecosystem community wallet.</p>
           </div>
           <ArrowRight className="splitarrow" />
           <div className="splitcard community">
-            <small>50% OF FEES</small>
-            <strong>DEV Community Wallet</strong>
-            <p>Supports city events, creators, partnerships and public initiatives.</p>
+            <small>CITY TOKENS</small>
+            <strong>50% · 30% · 20%</strong>
+            <p>50% buys $EARTH, 30% funds the city creator DEV, and 20% funds the main DEV wallet.</p>
           </div>
         </section>
         <section className="market">
@@ -691,16 +691,20 @@ function Launch() {
             )}
             <Field name="Website" placeholder="https://" />
             <Field name="X / Twitter" placeholder="@handle" />
+            <label className="full">
+              City Creator DEV Wallet
+              <input required placeholder="0x... receives 30% of city-token fees" />
+            </label>
           </div>
           <div className="curvenote">
             <BarChart3 />
             <p>
               <b>Fee split enforced by contract</b>
               <small>
-                50% buys back $EARTH. 50% funds the DEV community wallet.
+                50% buys $EARTH, 30% funds the city DEV, and 20% funds the main DEV wallet.
               </small>
             </p>
-            <strong>50 / 50 SPLIT</strong>
+            <strong>50 / 30 / 20</strong>
           </div>
           <button className="dark submit">
             {type === "point" ? "Launch City Token" : "Launch District"}
@@ -960,7 +964,8 @@ function TokenPage() {
             <div className="feebreakdown">
               <div><span>Protocol fee (1%)</span><b>{protocolFee.toFixed(4)} ETH</b></div>
               <div><span>50% → $EARTH buyback</span><b>{(protocolFee / 2).toFixed(4)} ETH</b></div>
-              <div><span>50% → DEV community</span><b>{(protocolFee / 2).toFixed(4)} ETH</b></div>
+              <div><span>30% → City creator DEV</span><b>{(protocolFee * .3).toFixed(4)} ETH</b></div>
+              <div><span>20% → Main token DEV</span><b>{(protocolFee * .2).toFixed(4)} ETH</b></div>
             </div>
             <button
               className={`dark submit ${side === "SELL" ? "danger" : ""}`}
@@ -1086,7 +1091,7 @@ function Footer() {
         )}
       </div>
       <div>
-        City tokens for everyone<small>50% buyback · 50% community</small>
+        City tokens for everyone<small>50% buyback · 30% city DEV · 20% main DEV</small>
       </div>
     </footer>
   );
