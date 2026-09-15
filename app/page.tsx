@@ -77,137 +77,8 @@ const launchCities: LaunchCity[] = [
   { name: "Rio de Janeiro", ticker: "RIO", region: "South America", landmark: "Christ the Redeemer", icon: "🗿", rank: 5 },
   { name: "Santiago", ticker: "SCL", region: "South America", landmark: "Gran Torre Santiago", icon: "🏙️", rank: 6 },
 ];
-const tokens: Token[] = [
-  [
-    "New York City",
-    "NYC",
-    "North America",
-    "$12.4M",
-    "+128.5%",
-    "#25D695",
-    [12, 20, 17, 28, 25, 42, 55],
-    "0xnyc",
-  ],
-  [
-    "Los Angeles",
-    "LAX",
-    "North America",
-    "$8.92M",
-    "+86.2%",
-    "#3259F5",
-    [12, 15, 23, 19, 30, 39, 44],
-    "0xlax",
-  ],
-  [
-    "London",
-    "LDN",
-    "Europe",
-    "$6.41M",
-    "+42.1%",
-    "#836EF9",
-    [8, 18, 15, 22, 31, 29, 38],
-    "0xldn",
-  ],
-  [
-    "Berlin",
-    "BER",
-    "Europe",
-    "$5.22M",
-    "+38.7%",
-    "#0052FF",
-    [15, 13, 20, 26, 23, 31, 37],
-    "0xber",
-  ],
-  [
-    "Miami",
-    "MIA",
-    "North America",
-    "$4.18M",
-    "+32.6%",
-    "#855DCD",
-    [10, 16, 15, 23, 21, 29, 34],
-    "0xmia",
-  ],
-  [
-    "Paris",
-    "PAR",
-    "Europe",
-    "$3.97M",
-    "+28.4%",
-    "#1A0C3D",
-    [13, 15, 14, 22, 25, 26, 31],
-    "0xpar",
-  ],
-  [
-    "Madrid",
-    "MAD",
-    "Europe",
-    "$3.12M",
-    "+25.1%",
-    "#111111",
-    [8, 11, 17, 15, 20, 24, 28],
-    "0xmad",
-  ],
-  [
-    "São Paulo",
-    "SAO",
-    "South America",
-    "$2.84M",
-    "+21.3%",
-    "#F5A623",
-    [7, 12, 10, 16, 19, 23, 25],
-    "0xsao",
-  ],
-].map(
-  (x) =>
-    ({
-      name: x[0],
-      ticker: x[1],
-      category: x[2],
-      cap: x[3],
-      change: x[4],
-      color: x[5],
-      data: x[6],
-      address: x[7],
-    }) as Token,
-);
-const milestones = [
-  {
-    name: "New York · 10K Citizens",
-    ticker: "NYC10K",
-    cap: "$18.2M",
-    change: "+156%",
-    progress: 78,
-  },
-  {
-    name: "Los Angeles · 5K Holders",
-    ticker: "LAX5K",
-    cap: "$9.61M",
-    change: "+112%",
-    progress: 86,
-  },
-  {
-    name: "London · $1M Treasury",
-    ticker: "LDN1M",
-    cap: "$7.44M",
-    change: "+86%",
-    progress: 64,
-  },
-  {
-    name: "Berlin · 50K Trades",
-    ticker: "BER50K",
-    cap: "$6.21M",
-    change: "+73%",
-    progress: 91,
-  },
-  {
-    name: "São Paulo · 25K Citizens",
-    ticker: "SAO25K",
-    cap: "$4.18M",
-    change: "+62%",
-    progress: 72,
-  },
-];
+const tokens: Token[] = [];
+const milestones: Array<{ name: string; ticker: string; cap: string; change: string; progress: number }> = [];
 function Logo() {
   return (
     <Link href="/" className="logo">
@@ -390,17 +261,27 @@ function Card({ t }: { t: Token }) {
     </Link>
   );
 }
+function EmptyLaunchState() {
+  return (
+    <div className="emptylaunch">
+      <Rocket />
+      <h3>No city tokens have launched yet</h3>
+      <p>Choose one of the available cities and become its first creator.</p>
+      <Link className="dark" href="/launch">Launch the first city <ArrowRight size={16} /></Link>
+    </div>
+  );
+}
 function HeroArt() {
   return (
     <div className="art">
       <div className="bubble" />
       <div className="float f1">
         <small>NORTH AMERICA</small>
-        <b>New York → $NYC</b>
+        <b>6 cities ready to launch</b>
       </div>
       <div className="float f2">
         <small>EUROPE</small>
-        <b>London → $LDN</b>
+        <b>6 cities ready to launch</b>
       </div>
       <div className="bigcoin">
         <i>P</i>
@@ -412,11 +293,11 @@ function HeroArt() {
       <div className="float mile">
         <div className="between">
           <small>MILESTONE</small>
-          <b>78%</b>
+          <b>0%</b>
         </div>
-          <strong>London · 5,000 Citizens</strong>
+          <strong>Waiting for the first city</strong>
         <div className="progress">
-          <i style={{ width: "78%" }} />
+          <i style={{ width: "0%" }} />
         </div>
         <p>Build the city together.</p>
       </div>
@@ -532,6 +413,7 @@ function Home() {
               {shown.map((t) => (
                 <Card key={t.ticker} t={t} />
               ))}
+              {!shown.length && <EmptyLaunchState />}
             </div>
             <aside>
               <div className="asidehead">
@@ -562,6 +444,7 @@ function Home() {
                   <strong>{m.change}</strong>
                 </Link>
               ))}
+              {!milestones.length && <p className="emptyaside">No community milestones yet.</p>}
             </aside>
           </div>
         </section>
@@ -616,7 +499,7 @@ function Launch() {
     [done, setDone] = useState(false);
   useEffect(() => {
     try {
-      setLocallyLaunched(JSON.parse(localStorage.getItem("earth-launched-cities") || "[]"));
+      setLocallyLaunched(JSON.parse(localStorage.getItem("earth-launched-cities-v2") || "[]"));
     } catch {
       setLocallyLaunched([]);
     }
@@ -660,7 +543,7 @@ function Launch() {
             e.preventDefault();
             if (!selectedCity) return;
             const next = [...new Set([...locallyLaunched, selectedCity.ticker])];
-            localStorage.setItem("earth-launched-cities", JSON.stringify(next));
+            localStorage.setItem("earth-launched-cities-v2", JSON.stringify(next));
             setLocallyLaunched(next);
             setDone(true);
           }}
@@ -842,6 +725,7 @@ function Explore({ mile = false }: { mile?: boolean }) {
                 </div>
               </Link>
             ))}
+            {!milestones.length && <EmptyLaunchState />}
           </div>
         ) : (
           <div className="grid explore">
@@ -850,6 +734,7 @@ function Explore({ mile = false }: { mile?: boolean }) {
               .map((t, i) => (
                 <Card t={t} key={i} />
               ))}
+            {!tokens.length && <EmptyLaunchState />}
           </div>
         )}
       </main>
@@ -862,6 +747,11 @@ function TokenPage() {
   const projectedHolding = Math.floor(Number(amt || 0) * 24271);
   const projectedTier = projectedHolding >= 250000 ? "Metropolitan" : projectedHolding >= 50000 ? "Citizen" : projectedHolding >= 10000 ? "Resident" : projectedHolding > 0 ? "Visitor" : "None";
   const protocolFee = Number(amt || 0) * 0.01;
+  if (!tokens.length) {
+    return (
+      <Shell><main className="page"><EmptyLaunchState /></main></Shell>
+    );
+  }
   return (
     <Shell>
       <main className="page">
@@ -1000,6 +890,11 @@ function TokenPage() {
 }
 function Leaderboard() {
   const [tab, setTab] = useState("CITIZENS");
+  if (!tokens.length) {
+    return (
+      <Shell><main className="page"><Title eyebrow="COMMUNITY SIGNAL" title="Leaderboard" text="Rankings begin after the first city token launches." /><EmptyLaunchState /></main></Shell>
+    );
+  }
   return (
     <Shell>
       <main className="page">
@@ -1065,6 +960,11 @@ function Leaderboard() {
   );
 }
 function Profile() {
+  if (!tokens.length) {
+    return (
+      <Shell><main className="page"><Title eyebrow="EARTH PASSPORT" title="No city activity yet" text="Connect your wallet after the first city launches." /><EmptyLaunchState /></main></Shell>
+    );
+  }
   return (
     <Shell>
       <main className="page">
