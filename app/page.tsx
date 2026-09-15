@@ -47,84 +47,84 @@ type Token = {
 };
 const tokens: Token[] = [
   [
-    "Hyperliquid Points",
-    "HYPE",
-    "Perps & Trading",
+    "New York City",
+    "NYC",
+    "North America",
     "$12.4M",
     "+128.5%",
     "#25D695",
     [12, 20, 17, 28, 25, 42, 55],
-    "0xhype",
+    "0xnyc",
   ],
   [
-    "Polymarket Rewards",
-    "POLY",
-    "Prediction Markets",
+    "Tokyo",
+    "TYO",
+    "Asia Pacific",
     "$8.92M",
     "+86.2%",
     "#3259F5",
     [12, 15, 23, 19, 30, 39, 44],
-    "0xpoly",
+    "0xtyo",
   ],
   [
-    "Monad XP",
-    "MON",
-    "Layer 1",
+    "London",
+    "LDN",
+    "Europe",
     "$6.41M",
     "+42.1%",
     "#836EF9",
     [8, 18, 15, 22, 31, 29, 38],
-    "0xmon",
+    "0xldn",
   ],
   [
-    "Base Builder Score",
-    "BASE",
-    "Onchain Social",
+    "Singapore",
+    "SGP",
+    "Asia Pacific",
     "$5.22M",
     "+38.7%",
     "#0052FF",
     [15, 13, 20, 26, 23, 31, 37],
-    "0xbase",
+    "0xsgp",
   ],
   [
-    "Farcaster Warps",
-    "WARP",
-    "SocialFi",
+    "Dubai",
+    "DXB",
+    "Middle East",
     "$4.18M",
     "+32.6%",
     "#855DCD",
     [10, 16, 15, 23, 21, 29, 34],
-    "0xwarp",
+    "0xdxb",
   ],
   [
-    "EigenLayer Points",
-    "EIGEN",
-    "Restaking",
+    "Paris",
+    "PAR",
+    "Europe",
     "$3.97M",
     "+28.4%",
     "#1A0C3D",
     [13, 15, 14, 22, 25, 26, 31],
-    "0xeigen",
+    "0xpar",
   ],
   [
-    "Ethena Shards",
-    "SHARD",
-    "DeFi Yield",
+    "Seoul",
+    "SEL",
+    "Asia Pacific",
     "$3.12M",
     "+25.1%",
     "#111111",
     [8, 11, 17, 15, 20, 24, 28],
-    "0xshard",
+    "0xsel",
   ],
   [
-    "Berachain BGT Points",
-    "BGT",
-    "Proof of Liquidity",
+    "Hong Kong",
+    "HKG",
+    "Asia Pacific",
     "$2.84M",
     "+21.3%",
     "#F5A623",
     [7, 12, 10, 16, 19, 23, 25],
-    "0xbgt",
+    "0xhkg",
   ],
 ].map(
   (x) =>
@@ -141,36 +141,36 @@ const tokens: Token[] = [
 );
 const milestones = [
   {
-    name: "Hyperliquid $1T Volume",
-    ticker: "HL1T",
+    name: "New York · 10K Citizens",
+    ticker: "NYC10K",
     cap: "$18.2M",
     change: "+156%",
     progress: 78,
   },
   {
-    name: "Polymarket 10M Traders",
-    ticker: "POLY10M",
+    name: "Tokyo · 5K Holders",
+    ticker: "TYO5K",
     cap: "$9.61M",
     change: "+112%",
     progress: 86,
   },
   {
-    name: "Monad 1M Wallets",
-    ticker: "MON1M",
+    name: "London · $1M Treasury",
+    ticker: "LDN1M",
     cap: "$7.44M",
     change: "+86%",
     progress: 64,
   },
   {
-    name: "Base 100M Transactions",
-    ticker: "BASE100",
+    name: "Singapore · 50K Trades",
+    ticker: "SGP50K",
     cap: "$6.21M",
     change: "+73%",
     progress: 91,
   },
   {
-    name: "Farcaster 5M Users",
-    ticker: "FC5M",
+    name: "Dubai · 25K Citizens",
+    ticker: "DXB25K",
     cap: "$4.18M",
     change: "+62%",
     progress: 72,
@@ -179,9 +179,9 @@ const milestones = [
 function Logo() {
   return (
     <Link href="/" className="logo">
-      <i>P</i>
+      <i>E</i>
       <b>
-        POINTS<span>//</span>FUN
+        EARTH<span>//</span>ONLINE
       </b>
     </Link>
   );
@@ -217,12 +217,12 @@ function Shell({ children }: { children: React.ReactNode }) {
         <Logo />
         <nav className={menu ? "open" : ""}>
           {[
-            ["Home", "/"],
-            ["Launchpad", "/explore"],
-            ["Create", "/launch"],
-            ["Holder Levels", "/points"],
-            ["Top Holders", "/leaderboard"],
-            ["Portfolio", "/profile"],
+            ["World", "/"],
+            ["Cities", "/explore"],
+            ["Launch City", "/launch"],
+            ["Citizen Levels", "/points"],
+            ["City Rankings", "/leaderboard"],
+            ["My Passport", "/profile"],
           ].map(([x, href]) => {
             return (
               <Link
@@ -241,7 +241,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             <Search size={16} />
             <input
               aria-label="Search markets"
-              placeholder="Search Web3 points and protocols..."
+              placeholder="Search cities and regions..."
               onKeyDown={(e) => {
                 if (e.key === "Enter" && e.currentTarget.value.trim())
                   router.push(
@@ -283,7 +283,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 <X />
               </button>
             </div>
-            <p>Choose a leading wallet to enter POINTS//FUN.</p>
+            <p>Choose a wallet to enter EARTH//ONLINE.</p>
             {["MetaMask", "Rabby", "Coinbase Wallet", "Phantom", "OKX Wallet"].map((w) => (
               <button
                 className="walletrow"
@@ -363,18 +363,18 @@ function HeroArt() {
     <div className="art">
       <div className="bubble" />
       <div className="float f1">
-        <small>PERPS POINTS</small>
-        <b>Hyperliquid → $HYPE</b>
+        <small>NORTH AMERICA</small>
+        <b>New York → $NYC</b>
       </div>
       <div className="float f2">
-        <small>ONCHAIN REWARDS</small>
-        <b>Monad XP → $MON</b>
+        <small>ASIA PACIFIC</small>
+        <b>Tokyo → $TYO</b>
       </div>
       <div className="bigcoin">
         <i>P</i>
-        <small>HOLDER LEVEL</small>
+        <small>CITIZEN LEVEL</small>
         <b>
-          GOLD <em>↑</em>
+          METROPOLITAN <em>↑</em>
         </b>
       </div>
       <div className="float mile">
@@ -382,11 +382,11 @@ function HeroArt() {
           <small>MILESTONE</small>
           <b>78%</b>
         </div>
-          <strong>1,000 Community Holders</strong>
+          <strong>Tokyo · 5,000 Citizens</strong>
         <div className="progress">
           <i style={{ width: "78%" }} />
         </div>
-        <p>Big moments deserve a coin.</p>
+        <p>Build the city together.</p>
       </div>
     </div>
   );
@@ -403,25 +403,25 @@ function Home() {
         <section className="hero">
           <div>
             <label>
-              <Sparkles size={14} /> PERMISSIONLESS TOKEN LAUNCHPAD
+              <Sparkles size={14} /> THE CITY TOKEN LAUNCHPAD
             </label>
             <h1>
-              Launch Any Token.
+              Own Your City.
               <br />
-              Grow Its <span>Community.</span>
+              Build Its <span>Future.</span>
             </h1>
-            <h2>Create, fund and discover community tokens onchain.</h2>
+            <h2>Launch and trade community-owned city tokens.</h2>
             <p>
-              Anyone can launch a token without approval. Holders progress from
-              Bronze to Diamond as their position grows and unlock stronger
-              community identity and launch benefits.
+              Every city becomes an onchain community. Trade city tokens, earn
+              citizen status and grow a transparent treasury for local culture,
+              events and community-led projects.
             </p>
             <div className="buttons">
               <Link className="dark" href="/launch">
-                Launch a Token <ArrowRight size={17} />
+                Launch a City <ArrowRight size={17} />
               </Link>
               <Link className="light" href="/explore">
-                Explore Launches
+                Explore Cities
               </Link>
             </div>
           </div>
@@ -429,9 +429,9 @@ function Home() {
         </section>
         <section className="features">
           {[
-            [Rocket, "Open Launch", "Anyone can create a token"],
-            [ShieldCheck, "Transparent Rules", "Contract details shown clearly"],
-            [Users, "Holder Identity", "Bronze to Diamond levels"],
+            [Rocket, "Launch Any City", "One city, one community token"],
+            [ShieldCheck, "50% Buyback", "Fees strengthen the $EARTH economy"],
+            [Users, "50% Community", "DEV wallet funds city building"],
           ].map(([Icon, a, b]) => (
             <div key={String(a)}>
               <i>{typeof Icon !== "string" && <Icon size={19} />}</i>
@@ -442,15 +442,33 @@ function Home() {
             </div>
           ))}
         </section>
+        <section className="flywheel">
+          <div className="flytitle">
+            <label>PROTOCOL FLYWHEEL</label>
+            <h2>Every fee goes back into the world.</h2>
+            <p>A 1% trading fee is split automatically and transparently.</p>
+          </div>
+          <div className="splitcard buyback">
+            <small>50% OF FEES</small>
+            <strong>$EARTH Buyback</strong>
+            <p>Automatically buys the main ecosystem token from the market.</p>
+          </div>
+          <ArrowRight className="splitarrow" />
+          <div className="splitcard community">
+            <small>50% OF FEES</small>
+            <strong>DEV Community Wallet</strong>
+            <p>Supports city events, creators, partnerships and public initiatives.</p>
+          </div>
+        </section>
         <section className="market">
           <div className="tabs">
             {[
               "Trending",
-              "Perps & Trading",
-              "Layer 1",
-              "Restaking",
-              "SocialFi",
-              "Milestones",
+              "Asia Pacific",
+              "Europe",
+              "North America",
+              "Middle East",
+              "Community Goals",
               "All",
             ].map((x) => (
               <button
@@ -464,10 +482,10 @@ function Home() {
           </div>
           <div className="sectionhead">
             <div>
-              <label>LIVE LAUNCHES</label>
-              <h2>Trending Community Tokens</h2>
+              <label>LIVE CITY MARKETS</label>
+              <h2>Trending Cities</h2>
               <p>
-                Discover new launches, follow their progress and join early.
+                Discover cities, join their communities and follow treasury growth.
               </p>
             </div>
             <Link href="/explore">
@@ -486,8 +504,8 @@ function Home() {
                   <TrendingUp />
                 </span>
                 <div>
-                  <small>MILESTONES</small>
-                  <h3>Top milestones</h3>
+                  <small>CITY GOALS</small>
+                  <h3>Community milestones</h3>
                 </div>
               </div>
               {milestones.map((m, i) => (
@@ -513,30 +531,30 @@ function Home() {
           </div>
         </section>
         <section className="manifesto">
-          <label>HOLDING BECOMES IDENTITY.</label>
+          <label>EVERY TRADE BUILDS THE WORLD.</label>
           <h2>
-            Open launches.
+            City tokens.
             <br />
-            <span>Stronger communities.</span>
+            <span>Real communities.</span>
           </h2>
           <p>
-            Every holder has a visible level based on their current token balance.
+            A transparent fee flywheel supports the main token and the people building each city.
           </p>
         </section>
         <section className="cta">
           <div>
-            <label>LAUNCH WITHOUT PERMISSION</label>
+            <label>PUT YOUR CITY ONCHAIN</label>
             <h2>
-              Your Token.
+              Your City.
               <br />
-              Your Community.
+              Your Movement.
             </h2>
             <p>
-              Set the token details, launch terms and holder-level thresholds,
-              then publish the project onchain.
+              Create a city token, open its market and give the community a
+              transparent wallet for long-term building.
             </p>
             <Link className="dark" href="/launch?type=milestone">
-              Create a Token <ArrowRight />
+              Launch Your City <ArrowRight />
             </Link>
           </div>
           <div className="ctaart">
@@ -568,8 +586,8 @@ function Launch() {
               <Check />
             </i>
             <label>LAUNCH DRAFT READY</label>
-            <h1>Token Launch Created</h1>
-            <p>Connect the launch contract before publishing it onchain.</p>
+            <h1>City Launch Created</h1>
+            <p>Connect the city launch contract before publishing it onchain.</p>
             <div className="buttons">
               <Link className="dark" href="/token/0xgxp">
                 View Launch
@@ -585,8 +603,8 @@ function Launch() {
       <main className="page">
         <Title
           eyebrow="PERMISSIONLESS LAUNCH"
-          title="Launch Your Token"
-          text="Anyone can configure a token launch and publish it onchain."
+          title="Launch a City Token"
+          text="Put any city onchain and open its community-owned market."
         />
         <div className="types">
           <button
@@ -595,7 +613,7 @@ function Launch() {
           >
             <i>P</i>
             <b>
-              TOKEN <small>Create a standard community launch</small>
+              CITY <small>Create a city community token</small>
             </b>
           </button>
           <button
@@ -606,7 +624,7 @@ function Launch() {
               <TrendingUp />
             </i>
             <b>
-              MILESTONE <small>Launch around a community goal</small>
+              DISTRICT <small>Launch a neighborhood or district</small>
             </b>
           </button>
         </div>
@@ -621,38 +639,38 @@ function Launch() {
               <label>{type.toUpperCase()} LAUNCH</label>
               <h2>
                 {type === "point"
-                  ? "Configure Your Token"
-                  : "Create a Milestone Token"}
+                  ? "Configure Your City"
+                  : "Configure Your District"}
               </h2>
             </div>
             <span>01 — DETAILS</span>
           </div>
           <div className="formgrid">
             <Field
-              name={type === "point" ? "Token Name" : "Milestone Name"}
-              placeholder={type === "point" ? "Community Token" : "1,000 Holders"}
+              name={type === "point" ? "City Name" : "District Name"}
+              placeholder={type === "point" ? "Shanghai" : "Pudong"}
             />
             <Field
               name="Ticker"
-              placeholder={type === "point" ? "FUN" : "HOLD1K"}
+              placeholder={type === "point" ? "SHA" : "PDG"}
             />
             <label className="full">
               Description
               <textarea
                 required
-                placeholder="Explain the project, launch terms and community..."
+                placeholder="Describe the city community and how its treasury will be used..."
               />
             </label>
             <label>
-              {type === "point" ? "Category" : "Milestone Type"}
+              {type === "point" ? "Region" : "City"}
               <select>
                 {[
-                  "Perps & Trading",
-                  "Layer 1",
-                  "Restaking",
-                  "Prediction Markets",
-                  "SocialFi",
-                  "DeFi Yield",
+                  "Asia Pacific",
+                  "Europe",
+                  "North America",
+                  "South America",
+                  "Middle East",
+                  "Africa",
                   "Other",
                 ].map((x) => (
                   <option key={x}>{x}</option>
@@ -660,7 +678,7 @@ function Launch() {
               </select>
             </label>
             <Field
-              name={type === "point" ? "Total Supply" : "Current Value"}
+              name={type === "point" ? "Total Supply" : "Population"}
               placeholder={type === "point" ? "1000000000" : "780"}
             />
             {type === "milestone" && (
@@ -678,15 +696,15 @@ function Launch() {
           <div className="curvenote">
             <BarChart3 />
             <p>
-              <b>Holder identity included</b>
+              <b>Fee split enforced by contract</b>
               <small>
-                Bronze, Silver, Gold and Diamond levels update with wallet balances.
+                50% buys back $EARTH. 50% funds the DEV community wallet.
               </small>
             </p>
-            <strong>ONCHAIN LEVELS</strong>
+            <strong>50 / 50 SPLIT</strong>
           </div>
           <button className="dark submit">
-            {type === "point" ? "Create Token Launch" : "Create Milestone"}
+            {type === "point" ? "Launch City Token" : "Launch District"}
             <ArrowRight />
           </button>
         </form>
@@ -704,18 +722,18 @@ function Field({ name, placeholder }: { name: string; placeholder: string }) {
 }
 function PointsProgram() {
   const tiers = [
-    { name: "Bronze", amount: "1+", benefit: "Holder badge", color: "#B87333" },
-    { name: "Silver", amount: "10K+", benefit: "Early launch alerts", color: "#8D9AAA" },
-    { name: "Gold", amount: "50K+", benefit: "Priority access", color: "#E2A928" },
-    { name: "Diamond", amount: "250K+", benefit: "Maximum allocation", color: "#5B8CFF" },
+    { name: "Visitor", amount: "1+", benefit: "City passport stamp", color: "#8D9AAA" },
+    { name: "Resident", amount: "10K+", benefit: "Community proposal access", color: "#2BAE76" },
+    { name: "Citizen", amount: "50K+", benefit: "Priority city events", color: "#E2A928" },
+    { name: "Metropolitan", amount: "250K+", benefit: "Maximum community status", color: "#5B8CFF" },
   ];
   return (
     <Shell>
       <main className="page">
         <Title
-          eyebrow="ONCHAIN HOLDER IDENTITY"
-          title="Holder Levels"
-          text="Your level is determined by the token balance held in your connected wallet."
+          eyebrow="YOUR ONCHAIN PASSPORT"
+          title="Citizen Levels"
+          text="Your identity in each city is determined by the city tokens in your wallet."
         />
         <section className="tiercards">
           {tiers.map((tier, index) => (
@@ -729,9 +747,9 @@ function PointsProgram() {
           ))}
         </section>
         <section className="pointsnotes">
-          <div><b>Balance based</b><p>The contract reads the current token balance of each wallet.</p></div>
-          <div><b>Project specific</b><p>Each launch may customize its level thresholds and benefits.</p></div>
-          <div><b>Always current</b><p>Your identity upgrades or downgrades automatically as holdings change.</p></div>
+          <div><b>City specific</b><p>Every city token gives your wallet a separate local identity.</p></div>
+          <div><b>Community access</b><p>Higher levels can unlock proposals, events and local benefits.</p></div>
+          <div><b>Always current</b><p>Your passport updates automatically as your city balance changes.</p></div>
         </section>
       </main>
     </Shell>
@@ -761,11 +779,11 @@ function Explore({ mile = false }: { mile?: boolean }) {
       <main className="page">
         <Title
           eyebrow="DISCOVER"
-          title={mile ? "Explore Milestones" : "Explore Points"}
+          title={mile ? "Community Goals" : "Explore Cities"}
           text={
             mile
-              ? "Track shared trading goals and bonus unlocks."
-              : "Compare eligible markets by activity and reward potential."
+              ? "Track the goals city communities are building toward."
+              : "Discover city tokens and join communities around the world."
           }
         />
         <div className="tabs">
@@ -820,18 +838,19 @@ function TokenPage() {
   const [side, setSide] = useState("BUY"),
     [amt, setAmt] = useState("0.5");
   const projectedHolding = Math.floor(Number(amt || 0) * 24271);
-  const projectedTier = projectedHolding >= 250000 ? "Diamond" : projectedHolding >= 50000 ? "Gold" : projectedHolding >= 10000 ? "Silver" : projectedHolding > 0 ? "Bronze" : "None";
+  const projectedTier = projectedHolding >= 250000 ? "Metropolitan" : projectedHolding >= 50000 ? "Citizen" : projectedHolding >= 10000 ? "Resident" : projectedHolding > 0 ? "Visitor" : "None";
+  const protocolFee = Number(amt || 0) * 0.01;
   return (
     <Shell>
       <main className="page">
         <div className="tokenhead">
-          <i className="coin" style={{ background: "#25D695" }}>H</i>
+          <i className="coin" style={{ background: "#20A66A" }}>N</i>
           <div>
-            <label>PERPS & TRADING</label>
+            <label>NORTH AMERICA · CITY TOKEN</label>
             <h1>
-              Hyperliquid Points <span>$HYPE</span>
+              New York City <span>$NYC</span>
             </h1>
-            <p>Created by 0x83...832 · 12 days ago</p>
+            <p>Launched by 0x83...832 · Community wallet public</p>
           </div>
           <button className="light">
             <Heart /> Watch
@@ -839,12 +858,12 @@ function TokenPage() {
         </div>
         <div className="stats">
           {[
-            ["Market Cap", "$1.24M"],
-            ["Price", "$0.00412"],
+            ["Market Cap", "$12.4M"],
+            ["Price", "$0.0412"],
             ["24H", "+128.5%"],
-            ["Raised", "$284.9K"],
-            ["Holders", "4,821"],
-            ["Launch Progress", "68%"],
+            ["24H Volume", "$284.9K"],
+            ["Citizens", "4,821"],
+            ["Community Fund", "$142.4K"],
           ].map((x) => (
             <div key={x[0]}>
               <small>{x[0]}</small>
@@ -856,7 +875,7 @@ function TokenPage() {
           <section className="chart">
             <div className="between">
               <div>
-                <small>HYPE / ETH</small>
+                <small>NYC / ETH</small>
                 <h2>
                   $0.00412 <span>+128.5%</span>
                 </h2>
@@ -932,18 +951,23 @@ function TokenPage() {
             </div>
             <p className="receive">
               <small>You receive</small>
-              <b>≈ {(Number(amt || 0) * 24271).toLocaleString()} HYPE</b>
+              <b>≈ {(Number(amt || 0) * 24271).toLocaleString()} NYC</b>
             </p>
             <div className="earnpreview">
-              <span><Sparkles size={16} /> Projected holder level</span>
+              <span><Sparkles size={16} /> Projected citizen level</span>
               <strong>{projectedTier}</strong>
-              <small>Based on approximately {projectedHolding.toLocaleString()} HYPE held after this purchase.</small>
+              <small>Based on approximately {projectedHolding.toLocaleString()} NYC held after this purchase.</small>
+            </div>
+            <div className="feebreakdown">
+              <div><span>Protocol fee (1%)</span><b>{protocolFee.toFixed(4)} ETH</b></div>
+              <div><span>50% → $EARTH buyback</span><b>{(protocolFee / 2).toFixed(4)} ETH</b></div>
+              <div><span>50% → DEV community</span><b>{(protocolFee / 2).toFixed(4)} ETH</b></div>
             </div>
             <button
               className={`dark submit ${side === "SELL" ? "danger" : ""}`}
               onClick={() => toast.error("Connect the live trading contract to submit this transaction.")}
             >
-              CONNECT CONTRACT TO {side}
+              CONNECT CONTRACT TO {side} $NYC
             </button>
           </aside>
         </div>
@@ -952,18 +976,18 @@ function TokenPage() {
   );
 }
 function Leaderboard() {
-  const [tab, setTab] = useState("HOLDERS");
+  const [tab, setTab] = useState("CITIZENS");
   return (
     <Shell>
       <main className="page">
         <Title
           eyebrow="COMMUNITY SIGNAL"
           title="Leaderboard"
-          text="Discover the strongest holders and fastest-growing launches."
+          text="Discover the strongest city communities and their leading citizens."
         />
         <section className="leader">
           <div className="tabs">
-            {["HOLDERS", "LAUNCHES", "CREATORS"].map((x) => (
+            {["CITIZENS", "CITIES", "FOUNDERS"].map((x) => (
               <button
                 className={tab === x ? "active" : ""}
                 onClick={() => setTab(x)}
@@ -977,9 +1001,9 @@ function Leaderboard() {
             <div className="row head">
               <span>Rank</span>
               <span>
-                {tab === "HOLDERS"
+                {tab === "CITIZENS"
                   ? "Wallet"
-                  : tab === "CREATORS"
+                  : tab === "FOUNDERS"
                     ? "Creator"
                     : "Token"}
               </span>
@@ -995,18 +1019,18 @@ function Leaderboard() {
                   <span className="who">
                     <i style={{ background: t.color }}>{t.ticker[0]}</i>
                     <b>
-                      {tab === "HOLDERS"
+                      {tab === "CITIZENS"
                         ? `0x${83 + i}...${832 - i}`
-                        : tab === "CREATORS"
+                        : tab === "FOUNDERS"
                           ? `0x${93 + i}...${742 - i}`
                           : t.name}
                     </b>
                     <small>
-                      {tab === "HOLDERS" ? `Holds $${t.ticker}` : `$${t.ticker}`}
+                      {tab === "CITIZENS" ? `Citizen of ${t.name}` : `$${t.ticker}`}
                     </small>
                   </span>
                   <span>{(284000 - i * 13000).toLocaleString()}</span>
-                  <span>{i < 2 ? "Diamond" : i < 5 ? "Gold" : "Silver"}</span>
+                  <span>{i < 2 ? "Metropolitan" : i < 5 ? "Citizen" : "Resident"}</span>
                   <strong>{(2 - i * .08).toFixed(2)}×</strong>
                 </div>
               );
@@ -1022,17 +1046,17 @@ function Profile() {
     <Shell>
       <main className="page">
         <Title
-          eyebrow="HOLDER PORTFOLIO"
+          eyebrow="EARTH PASSPORT"
           title="0x83...832"
-          text="Your launches, holdings, identity levels and claimable allocations."
+          text="Your city holdings, citizen identities and community treasury activity."
         />
         <div className="stats">
           {[
             ["Portfolio Value", "$28.4K"],
-            ["Highest Level", "Gold"],
-            ["Launches Joined", "12"],
-            ["Tokens Created", "2"],
-            ["Claimable", "$1,840"],
+            ["Highest Level", "Citizen"],
+            ["Cities Joined", "12"],
+            ["Cities Launched", "2"],
+            ["Community Share", "$1,840"],
             ["Wallet Status", "Connected"],
           ].map((x) => (
             <div key={x[0]}>
@@ -1055,15 +1079,15 @@ function Footer() {
     <footer>
       <div>
         <Logo />
-        <p>Launch Any Token. Grow Its Community.</p>
+        <p>Own Your City. Build Its Future.</p>
       </div>
       <div>
-        {[["Launchpad", "/explore"], ["Create", "/launch"], ["Holder Levels", "/points"], ["Top Holders", "/leaderboard"], ["Portfolio", "/profile"]].map(
+        {[["Cities", "/explore"], ["Launch City", "/launch"], ["Citizen Levels", "/points"], ["City Rankings", "/leaderboard"], ["Passport", "/profile"]].map(
           ([label, href]) => <Link href={href} key={label}>{label}</Link>,
         )}
       </div>
       <div>
-        Permissionless token launches<small>Holder levels onchain</small>
+        City tokens for everyone<small>50% buyback · 50% community</small>
       </div>
     </footer>
   );
@@ -1083,9 +1107,9 @@ export default function App() {
     context.registerTool(
       {
         name: "start_token_launch",
-        title: "Start token launch",
+        title: "Launch a city token",
         description:
-          "Open the POINTS//FUN token launch flow for a point or milestone.",
+          "Open the EARTH//ONLINE launch flow for a city or district token.",
         inputSchema: {
           type: "object",
           properties: {
