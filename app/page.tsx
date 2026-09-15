@@ -57,14 +57,14 @@ const tokens: Token[] = [
     "0xnyc",
   ],
   [
-    "Tokyo",
-    "TYO",
-    "Asia Pacific",
+    "Los Angeles",
+    "LAX",
+    "North America",
     "$8.92M",
     "+86.2%",
     "#3259F5",
     [12, 15, 23, 19, 30, 39, 44],
-    "0xtyo",
+    "0xlax",
   ],
   [
     "London",
@@ -77,24 +77,24 @@ const tokens: Token[] = [
     "0xldn",
   ],
   [
-    "Singapore",
-    "SGP",
-    "Asia Pacific",
+    "Berlin",
+    "BER",
+    "Europe",
     "$5.22M",
     "+38.7%",
     "#0052FF",
     [15, 13, 20, 26, 23, 31, 37],
-    "0xsgp",
+    "0xber",
   ],
   [
-    "Dubai",
-    "DXB",
-    "Middle East",
+    "Miami",
+    "MIA",
+    "North America",
     "$4.18M",
     "+32.6%",
     "#855DCD",
     [10, 16, 15, 23, 21, 29, 34],
-    "0xdxb",
+    "0xmia",
   ],
   [
     "Paris",
@@ -107,24 +107,24 @@ const tokens: Token[] = [
     "0xpar",
   ],
   [
-    "Seoul",
-    "SEL",
-    "Asia Pacific",
+    "Madrid",
+    "MAD",
+    "Europe",
     "$3.12M",
     "+25.1%",
     "#111111",
     [8, 11, 17, 15, 20, 24, 28],
-    "0xsel",
+    "0xmad",
   ],
   [
-    "Hong Kong",
-    "HKG",
-    "Asia Pacific",
+    "São Paulo",
+    "SAO",
+    "South America",
     "$2.84M",
     "+21.3%",
     "#F5A623",
     [7, 12, 10, 16, 19, 23, 25],
-    "0xhkg",
+    "0xsao",
   ],
 ].map(
   (x) =>
@@ -148,8 +148,8 @@ const milestones = [
     progress: 78,
   },
   {
-    name: "Tokyo · 5K Holders",
-    ticker: "TYO5K",
+    name: "Los Angeles · 5K Holders",
+    ticker: "LAX5K",
     cap: "$9.61M",
     change: "+112%",
     progress: 86,
@@ -162,15 +162,15 @@ const milestones = [
     progress: 64,
   },
   {
-    name: "Singapore · 50K Trades",
-    ticker: "SGP50K",
+    name: "Berlin · 50K Trades",
+    ticker: "BER50K",
     cap: "$6.21M",
     change: "+73%",
     progress: 91,
   },
   {
-    name: "Dubai · 25K Citizens",
-    ticker: "DXB25K",
+    name: "São Paulo · 25K Citizens",
+    ticker: "SAO25K",
     cap: "$4.18M",
     change: "+62%",
     progress: 72,
@@ -367,8 +367,8 @@ function HeroArt() {
         <b>New York → $NYC</b>
       </div>
       <div className="float f2">
-        <small>ASIA PACIFIC</small>
-        <b>Tokyo → $TYO</b>
+        <small>EUROPE</small>
+        <b>London → $LDN</b>
       </div>
       <div className="bigcoin">
         <i>P</i>
@@ -382,7 +382,7 @@ function HeroArt() {
           <small>MILESTONE</small>
           <b>78%</b>
         </div>
-          <strong>Tokyo · 5,000 Citizens</strong>
+          <strong>London · 5,000 Citizens</strong>
         <div className="progress">
           <i style={{ width: "78%" }} />
         </div>
@@ -430,8 +430,8 @@ function Home() {
         <section className="features">
           {[
             [Rocket, "Launch Any City", "One city, one community token"],
-            [ShieldCheck, "50% Buyback", "Fees strengthen the $EARTH economy"],
-            [Users, "50% Community", "DEV wallet funds city building"],
+            [ShieldCheck, "Europe & Americas", "The first regions now live"],
+            [Users, "50 / 50 Flywheel", "Buyback plus community building"],
           ].map(([Icon, a, b]) => (
             <div key={String(a)}>
               <i>{typeof Icon !== "string" && <Icon size={19} />}</i>
@@ -464,10 +464,9 @@ function Home() {
           <div className="tabs">
             {[
               "Trending",
-              "Asia Pacific",
               "Europe",
               "North America",
-              "Middle East",
+              "South America",
               "Community Goals",
               "All",
             ].map((x) => (
@@ -479,6 +478,10 @@ function Home() {
                 {x}
               </button>
             ))}
+          </div>
+          <div className="regionnotice">
+            <b>NOW OPEN</b> Europe · North America · South America
+            <span>Asia, Africa, Middle East and Oceania are coming soon.</span>
           </div>
           <div className="sectionhead">
             <div>
@@ -648,7 +651,7 @@ function Launch() {
           <div className="formgrid">
             <Field
               name={type === "point" ? "City Name" : "District Name"}
-              placeholder={type === "point" ? "Shanghai" : "Pudong"}
+              placeholder={type === "point" ? "Lisbon" : "Brooklyn"}
             />
             <Field
               name="Ticker"
@@ -665,13 +668,9 @@ function Launch() {
               {type === "point" ? "Region" : "City"}
               <select>
                 {[
-                  "Asia Pacific",
                   "Europe",
                   "North America",
                   "South America",
-                  "Middle East",
-                  "Africa",
-                  "Other",
                 ].map((x) => (
                   <option key={x}>{x}</option>
                 ))}
