@@ -61,5 +61,11 @@ administrator setter. Minimum native trade value is immutable per deployment,
 all trade entry points are reentrancy guarded, user minimum-output protection is
 required, and distribution/trade/buyback events are emitted onchain.
 
+Community shares use pull payments: trading records each recipient's balance in
+`claimableCommunityFees`, and the bound wallet calls `claimCommunityFees` to
+withdraw. A recipient that cannot receive ETH therefore cannot block trading.
+The website renders the claim control only when the connected address matches a
+launched city's immutable creator address.
+
 The tax applies to trades executed through `BondingCurve`. Plain ERC-20 wallet
 transfers or unrelated third-party markets are not taxed by this architecture.

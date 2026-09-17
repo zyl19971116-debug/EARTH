@@ -21,6 +21,18 @@ async function main() {
   await (await curve.buy(earthAddress, quote * 99n / 100n, { value: hre.ethers.parseEther("0.0001") })).wait();
   if (await earth.balanceOf(wallet.address) <= hre.ethers.parseEther("100000000")) throw new Error("buy failed");
 
+  const factoryContract = await hre.ethers.getContractAt("PointFactory", cityFactoryAddress);
+  const istKey = await factoryContract.cityKeyFor("IST");
+  await (await factoryContract.launchCityToken(istKey, "/cities/istanbul.png", "pull-payment test", { value: hre.ethers.parseEther("0.001") })).wait();
+  const ist = await factoryContract.getCity(istKey);
+  const claimBeforeCityTrade = await curve.claimableCommunityFees(wallet.address);
+  const cityQuote = await curve.getBuyPrice(ist.token, hre.ethers.parseEther("0.0001"));
+  await (await curve.buy(ist.token, cityQuote * 99n / 100n, { value: hre.ethers.parseEther("0.0001") })).wait();
+  const expectedClaim = hre.ethers.parseEther("0.000001");
+  if ((await curve.claimableCommunityFees(wallet.address)) - claimBeforeCityTrade !== expectedClaim) throw new Error("community accrual mismatch");
+  await (await curve.claimCommunityFees(wallet.address)).wait();
+  if (await curve.claimableCommunityFees(wallet.address) !== 0n) throw new Error("community claim failed");
+
   console.log("Robinhood test deployment passed");
   console.log("Deployment:", await deployment.getAddress());
   console.log("EARTH:", earthAddress);

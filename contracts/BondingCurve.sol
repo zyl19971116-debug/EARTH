@@ -35,11 +35,14 @@ contract BondingCurve {
     mapping(address => uint256) public virtualTokenReserve;
     mapping(address => bool) public graduated;
     mapping(address => TokenConfig) public tokenConfig;
+    mapping(address => uint256) public claimableCommunityFees;
     uint256 private locked = 1;
 
     event TokenConfigured(address indexed token, TokenType tokenType, address indexed cityDevWallet);
     event Trade(address indexed token, address indexed user, bool buy, uint256 input, uint256 output, uint256 tax);
     event TaxDistributed(address indexed token, uint256 totalTax, uint256 earthBuyback, uint256 cityCommunity, uint256 mainCommunity);
+    event CommunityFeeAccrued(address indexed wallet, address indexed token, uint256 amount, bool cityShare);
+    event CommunityFeesClaimed(address indexed wallet, address indexed recipient, uint256 amount);
     event Graduated(address indexed token);
 
     modifier onlyOwner() { require(msg.sender == owner, "owner"); _; }
@@ -160,12 +163,26 @@ contract BondingCurve {
         } else {
             cityAmount = tax * CITY_DEV_SHARE_BPS / BPS_DENOMINATOR;
             mainAmount = tax - buybackAmount - cityAmount;
-            _sendNative(payable(tokenConfig[token].cityDevWallet), cityAmount);
+            address cityWallet = tokenConfig[token].cityDevWallet;
+            claimableCommunityFees[cityWallet] += cityAmount;
+            emit CommunityFeeAccrued(cityWallet, token, cityAmount, true);
         }
-        _sendNative(payable(mainDevWallet), mainAmount);
+        claimableCommunityFees[mainDevWallet] += mainAmount;
+        emit CommunityFeeAccrued(mainDevWallet, token, mainAmount, false);
         uint256 earthBought = buybackExecutor.buyback{value: buybackAmount}(earthToken, buybackRecipient);
         require(earthBought > 0, "buyback failed");
         emit TaxDistributed(token, tax, buybackAmount, cityAmount, mainAmount);
+    }
+
+    /// @notice Pull accrued community fees without blocking user trades when a
+    /// recipient wallet cannot receive native currency during distribution.
+    function claimCommunityFees(address payable recipient) external nonReentrant returns (uint256 amount) {
+        require(recipient != address(0), "recipient");
+        amount = claimableCommunityFees[msg.sender];
+        require(amount > 0, "nothing to claim");
+        claimableCommunityFees[msg.sender] = 0;
+        _sendNative(recipient, amount);
+        emit CommunityFeesClaimed(msg.sender, recipient, amount);
     }
 
     function _tax(uint256 amount) internal pure returns (uint256) { return amount * TRADE_TAX_BPS / BPS_DENOMINATOR; }
