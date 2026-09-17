@@ -805,7 +805,16 @@ function Launch() {
               <small>{launchAccount ? `${launchAccount.slice(0, 8)}…${launchAccount.slice(-6)} · receives the city creator's 30% fee share` : "The wallet that launches the city token receives its 30% creator fee share."}</small>
             </div>
           </div>
-          <button className="dark submit" disabled={!selectedCity || launching}>
+          {!contractReady && (
+            <div className="deploymentnotice" role="status">
+              <ShieldCheck size={18} />
+              <div>
+                <b>City factory deployment pending</b>
+                <small>$EARTH is live, but the city-token factory still needs one mainnet deployment and binding transaction before public launches can open.</small>
+              </div>
+            </div>
+          )}
+          <button className="dark submit" disabled={!selectedCity || launching || !contractReady}>
             {!selectedCity ? "Choose a City to Continue" : !launchAccount ? "Connect Wallet to Launch" : launching ? "Launching…" : contractReady ? "Launch City Token" : "Mainnet Factory Deployment Required"}
             <ArrowRight />
           </button>
