@@ -21,7 +21,6 @@ import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { toast, Toaster } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
 import CommunityFeeClaim from "@/components/CommunityFeeClaim";
-import PendingBuyback from "@/components/PendingBuyback";
 
 type EthereumProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -524,7 +523,6 @@ function Home() {
             <div><small>MARKET CAP</small><b>—</b></div>
           </div>
         </section>
-        <PendingBuyback />
         <section className="market">
           <div className="tabs">
             {[
