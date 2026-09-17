@@ -72,12 +72,13 @@ slippage check fails, the trade continues and the 50% buyback share is recorded
 in `pendingBuybackNative`. Anyone can later call `executePendingBuyback` for a
 partial or full pending amount. A failed retry leaves the pending balance intact.
 `BuybackDeferred` and `DeferredBuybackExecuted` provide an auditable lifecycle.
-The production website schedules `/api/cron/buyback` every five minutes. Its
-keeper reads the pending balance and submits a retry only when the balance is
-non-zero. Configure `BUYBACK_KEEPER_PRIVATE_KEY`, `BONDING_CURVE_ADDRESS`,
-`ROBINHOOD_RPC_URL`, and `CRON_SECRET` as encrypted Vercel environment values;
-never commit the keeper private key. The keeper wallet needs only enough native
-currency for gas and does not custody protocol fees.
+The GitHub Actions keeper calls the production `/api/cron/buyback` endpoint
+every five minutes. The endpoint reads the pending balance and submits a retry
+only when the balance is non-zero. Configure `BUYBACK_KEEPER_PRIVATE_KEY`,
+`BONDING_CURVE_ADDRESS`, `ROBINHOOD_RPC_URL`, and `CRON_SECRET` as encrypted
+Vercel environment values, and add the same `CRON_SECRET` as a GitHub Actions
+secret. Never commit the keeper private key. The keeper wallet needs only enough
+native currency for gas and does not custody protocol fees.
 
 The tax applies to trades executed through `BondingCurve`. Plain ERC-20 wallet
 transfers or unrelated third-party markets are not taxed by this architecture.

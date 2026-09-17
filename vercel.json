@@ -1,11 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "npx next build",
-  "crons": [
-    {
-      "path": "/api/cron/buyback",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "buildCommand": "npx next build"
 }
