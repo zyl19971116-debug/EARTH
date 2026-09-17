@@ -22,11 +22,13 @@ Copy `.env.robinhood.example` to a private environment file and replace every
 placeholder. The production deployment script rejects missing or zero wallet
 addresses and refuses to run on any chain other than Robinhood mainnet 4663.
 
-The current default community, buyback-recipient and EARTH treasury wallet is
-`0xeD370d524dd0A883d7147d6dFdB1F9FE2ec77E26`, recorded in
-`config/robinhood-wallets.json`. Environment variables can override these roles
-before deployment. This is a public recipient address only; no private key is
-stored in the repository.
+The main-token community / DEV wallet is
+`0xbA0eE0bc41407F797a88D7e12A922517a82EA599`, recorded as
+`mainCommunityWallet` in `config/robinhood-wallets.json`. It is bound immutably
+when `BondingCurve` is deployed and accrues the 20% main-community share of
+city-token fees. The buyback recipient remains a separate deployment setting.
+These are public recipient addresses only; no private key is stored in the
+repository.
 
 ## Commands
 
