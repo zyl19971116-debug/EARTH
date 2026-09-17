@@ -130,8 +130,31 @@ const launchCities: LaunchCity[] = [
   { name: "Rio de Janeiro", ticker: "RIO", region: "South America", landmark: "Christ the Redeemer", icon: "/cities/rio.png", rank: 5 },
   { name: "Santiago", ticker: "SCL", region: "South America", landmark: "Gran Torre Santiago", icon: "/cities/santiago.png", rank: 6 },
 ];
-const tokens: Token[] = [];
 const milestones: Array<{ name: string; ticker: string; cap: string; change: string; progress: number }> = [];
+const cityFactoryReadAbi = [
+  "function getAllCities() view returns((string name,string symbol,string region,string landmark,uint8 populationRank,bool launched,address token,address creator,address communityWallet,uint64 launchedAt)[])",
+];
+
+function useCityTokens() {
+  const [tokens, setTokens] = useState<Token[]>([]);
+  useEffect(() => {
+    if (!POINT_FACTORY_ADDRESS) return;
+    const factory = new Contract(POINT_FACTORY_ADDRESS, cityFactoryReadAbi, new JsonRpcProvider(ROBINHOOD_CHAIN.rpcUrls[0]));
+    factory.getAllCities().then((cities: Array<{ name: string; symbol: string; region: string; launched: boolean; token: string }>) => {
+      setTokens(cities.filter((city) => city.launched).map((city) => ({
+        name: city.name,
+        ticker: city.symbol,
+        category: city.region,
+        cap: "ONCHAIN",
+        change: "LIVE",
+        color: "#168f70",
+        data: [1, 1],
+        address: city.token,
+      })));
+    }).catch(() => setTokens([]));
+  }, []);
+  return tokens;
+}
 function Logo() {
   return (
     <Link href="/" className="logo" aria-label="EARTH ONLINE home">
@@ -463,6 +486,7 @@ function HeroArt() {
 }
 function Home() {
   const [cat, setCat] = useState("Trending");
+  const tokens = useCityTokens();
   const shown =
     cat === "Trending" || cat === "All"
       ? tokens
@@ -919,6 +943,7 @@ function Title({
 }
 function Explore({ mile = false }: { mile?: boolean }) {
   const [sort, setSort] = useState("Trending");
+  const tokens = useCityTokens();
   return (
     <Shell>
       <main className="page">
