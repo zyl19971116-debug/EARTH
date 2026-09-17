@@ -15,6 +15,7 @@ module.exports = {
     cache: "./cache-hardhat",
   },
   networks: {
+    hardhat: { chainId: 46630 },
     robinhood: {
       url: process.env.ROBINHOOD_RPC_URL || "https://rpc.mainnet.chain.robinhood.com",
       chainId: 4663,
