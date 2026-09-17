@@ -1,0 +1,68 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+const hre = require("hardhat");
+
+function requiredAddress(name) {
+  const value = process.env[name];
+  if (!value || !hre.ethers.isAddress(value) || value === hre.ethers.ZeroAddress) {
+    throw new Error(`${name} must be a non-zero address`);
+  }
+  return value;
+}
+
+async function deploy(name, args) {
+  const factory = await hre.ethers.getContractFactory(name);
+  const contract = await factory.deploy(...args);
+  await contract.waitForDeployment();
+  const address = await contract.getAddress();
+  console.log(`${name}: ${address}`);
+  return contract;
+}
+
+async function main() {
+  const network = await hre.ethers.provider.getNetwork();
+  if (network.chainId !== 4663n && network.chainId !== 46630n) {
+    throw new Error(`Refusing unsupported chain ${network.chainId}`);
+  }
+
+  const [deployer] = await hre.ethers.getSigners();
+  const mainCommunityWallet = requiredAddress("MAIN_COMMUNITY_WALLET");
+  const buybackRecipient = requiredAddress("BUYBACK_RECIPIENT");
+  const dexRouter = requiredAddress("ROBINHOOD_DEX_ROUTER");
+  const wrappedNative = requiredAddress("ROBINHOOD_WRAPPED_NATIVE");
+  const treasury = process.env.EARTH_TREASURY || deployer.address;
+  if (!hre.ethers.isAddress(treasury)) throw new Error("EARTH_TREASURY must be an address");
+
+  const graduationCap = hre.ethers.parseEther(process.env.GRADUATION_MARKET_CAP_ETH || "30");
+  const minimumTrade = hre.ethers.parseEther(process.env.MINIMUM_TRADE_ETH || "0.001");
+  const slippageBps = Number(process.env.BUYBACK_SLIPPAGE_BPS || "500");
+
+  console.log(`Network chain ID: ${network.chainId}`);
+  console.log(`Deployer: ${deployer.address}`);
+
+  const earth = await deploy("EarthToken", [treasury]);
+  const buyback = await deploy("EarthBuybackExecutor", [dexRouter, wrappedNative, slippageBps]);
+  const curve = await deploy("BondingCurve", [
+    graduationCap,
+    await earth.getAddress(),
+    mainCommunityWallet,
+    await buyback.getAddress(),
+    buybackRecipient,
+    minimumTrade,
+  ]);
+  const factory = await deploy("PointFactory", [await curve.getAddress()]);
+
+  await (await buyback.setBondingCurve(await curve.getAddress())).wait();
+  await (await curve.setFactory(await factory.getAddress())).wait();
+
+  console.log("Wiring complete.");
+  console.log("NEXT_PUBLIC_ROBINHOOD_CHAIN_ID=" + network.chainId);
+  console.log("NEXT_PUBLIC_EARTH_TOKEN_ADDRESS=" + await earth.getAddress());
+  console.log("NEXT_PUBLIC_BONDING_CURVE_ADDRESS=" + await curve.getAddress());
+  console.log("NEXT_PUBLIC_POINT_FACTORY_ADDRESS=" + await factory.getAddress());
+  console.log("Important: seed EARTH liquidity and confirm a live EARTH/WETH route before enabling trading.");
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

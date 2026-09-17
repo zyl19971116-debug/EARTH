@@ -42,6 +42,30 @@ declare global {
   }
 }
 
+const ROBINHOOD_CHAIN = {
+  chainId: "0x1237", // 4663
+  chainName: "Robinhood Chain",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: ["https://rpc.mainnet.chain.robinhood.com"],
+  blockExplorerUrls: ["https://robinhoodchain.blockscout.com"],
+};
+
+async function ensureRobinhoodChain(provider: EthereumProvider) {
+  try {
+    await provider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: ROBINHOOD_CHAIN.chainId }],
+    });
+  } catch (error) {
+    const code = (error as { code?: number })?.code;
+    if (code !== 4902) throw error;
+    await provider.request({
+      method: "wallet_addEthereumChain",
+      params: [ROBINHOOD_CHAIN],
+    });
+  }
+}
+
 function Link({
   href,
   children,
@@ -191,6 +215,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     }
     setConnecting(name);
     try {
+      await ensureRobinhoodChain(provider);
       const result = await provider.request({ method: "eth_requestAccounts" });
       const address = (result as string[])?.[0];
       if (!address) throw new Error("No account was returned by the wallet.");
@@ -198,7 +223,7 @@ function Shell({ children }: { children: React.ReactNode }) {
       setAccount(address);
       publishConnectedAccount(address);
       setWallet(false);
-      toast.success(`${name} connected`);
+      toast.success(`${name} connected to Robinhood Chain`);
     } catch (error) {
       const message = error instanceof Error ? error.message : "Wallet connection was rejected.";
       toast.error(message);
@@ -278,7 +303,7 @@ function Shell({ children }: { children: React.ReactNode }) {
                 <X />
               </button>
             </div>
-            <p>Choose a wallet to enter EARTH ONLINE.</p>
+            <p>Choose a wallet to connect to Robinhood Chain.</p>
             {["MetaMask", "Rabby", "Coinbase Wallet", "Phantom", "OKX Wallet"].map((w) => (
               <button
                 className="walletrow"
@@ -619,9 +644,10 @@ function Home() {
 function Launch() {
   const [region, setRegion] = useState<LaunchCity["region"]>("Europe"),
     [selectedTicker, setSelectedTicker] = useState(""),
-    [launchAccount, setLaunchAccount] = useState("");
+    [launchAccount, setLaunchAccount] = useState(() =>
+      typeof window === "undefined" ? "" : localStorage.getItem("earth-account") || "",
+    );
   useEffect(() => {
-    setLaunchAccount(localStorage.getItem("earth-account") || "");
     const handleAccount = (event: Event) => setLaunchAccount((event as CustomEvent<string>).detail || "");
     window.addEventListener("earth-account-changed", handleAccount);
     return () => window.removeEventListener("earth-account-changed", handleAccount);
@@ -876,9 +902,10 @@ function Leaderboard() {
   );
 }
 function Profile() {
-  const [account, setAccount] = useState("");
+  const [account, setAccount] = useState(() =>
+    typeof window === "undefined" ? "" : localStorage.getItem("earth-account") || "",
+  );
   useEffect(() => {
-    setAccount(localStorage.getItem("earth-account") || "");
     const handleAccount = (event: Event) =>
       setAccount((event as CustomEvent<string>).detail || "");
     window.addEventListener("earth-account-changed", handleAccount);

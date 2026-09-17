@@ -30,6 +30,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.robinhood.example
 
 # vercel
 .vercel
@@ -45,8 +46,11 @@ next-env.d.ts
 /outputs/
 /work/
 /.contract-build/
+/artifacts/
+/cache-hardhat/
 
 .vercel
 
 .vercel
 .env*
+!.env.robinhood.example

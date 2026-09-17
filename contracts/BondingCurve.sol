@@ -2,6 +2,7 @@
 pragma solidity ^0.8.24;
 
 interface IERC20Lite {
+    function balanceOf(address account) external view returns (uint256);
     function transfer(address to, uint256 amount) external returns (bool);
     function transferFrom(address from, address to, uint256 amount) external returns (bool);
 }
@@ -22,6 +23,7 @@ contract BondingCurve {
     struct TokenConfig { TokenType tokenType; address cityDevWallet; }
 
     uint256 public immutable graduationMarketCap;
+    uint256 public immutable minimumNativeTrade;
     address public immutable earthToken;
     address public immutable mainDevWallet;
     address public immutable buybackRecipient;
@@ -49,14 +51,17 @@ contract BondingCurve {
         address earthToken_,
         address mainDevWallet_,
         address buybackExecutor_,
-        address buybackRecipient_
+        address buybackRecipient_,
+        uint256 minimumNativeTrade_
     ) {
         require(cap > 0, "cap");
         require(earthToken_ != address(0), "earth token");
         require(mainDevWallet_ != address(0), "main dev");
         require(buybackExecutor_ != address(0), "buyback executor");
         require(buybackRecipient_ != address(0), "buyback recipient");
+        require(minimumNativeTrade_ > 0, "minimum trade");
         graduationMarketCap = cap;
+        minimumNativeTrade = minimumNativeTrade_;
         earthToken = earthToken_;
         mainDevWallet = mainDevWallet_;
         buybackExecutor = IEarthBuybackExecutor(buybackExecutor_);
@@ -89,6 +94,7 @@ contract BondingCurve {
         require(token != address(0), "token");
         require(tokenConfig[token].tokenType == TokenType.Unconfigured, "configured");
         require(ethReserve > 0 && tokenReserve > 0, "reserves");
+        require(IERC20Lite(token).balanceOf(address(this)) >= tokenReserve, "token reserve not funded");
         tokenConfig[token] = TokenConfig(kind, cityDevWallet);
         virtualEthReserve[token] = ethReserve;
         virtualTokenReserve[token] = tokenReserve;
@@ -113,7 +119,7 @@ contract BondingCurve {
 
     function buy(address token, uint256 minTokenOut) external payable nonReentrant {
         _requireTradable(token);
-        require(msg.value > 0, "zero input");
+        require(msg.value >= minimumNativeTrade, "below minimum trade");
         uint256 tax = _tax(msg.value);
         uint256 netEthIn = msg.value - tax;
         uint256 x = virtualEthReserve[token];
@@ -133,6 +139,7 @@ contract BondingCurve {
         uint256 x = virtualEthReserve[token];
         uint256 y = virtualTokenReserve[token];
         uint256 grossEthOut = x - (x * y) / (y + tokenAmount);
+        require(grossEthOut >= minimumNativeTrade, "below minimum trade");
         uint256 tax = _tax(grossEthOut);
         uint256 netEthOut = grossEthOut - tax;
         require(netEthOut >= minEthOut && netEthOut > 0, "slippage");
