@@ -39,7 +39,7 @@ npm run contracts:deploy:robinhood
 ```
 
 The production script pins EARTH to token
-`0xd9731Ac1557fb22c5b51b348aA06CA73B920b9c2` and its Pons V2 curve
+`0xd9731Ac1557fb22c5b51B348aA06CA73B920b9c2` and its Pons V2 curve
 `0x14ee0C70DF1f2A9eBA9aA375B1880fBD63911306`. It verifies bytecode, token/curve
 association, native quote asset and graduation state before deployment.
 

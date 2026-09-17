@@ -3,7 +3,7 @@ const hre = require("hardhat");
 const configuredWallets = require("../config/robinhood-wallets.json");
 
 const ROBINHOOD_MAINNET_CHAIN_ID = 4663n;
-const PONS_EARTH_TOKEN = "0xd9731Ac1557fb22c5b51b348aA06CA73B920b9c2";
+const PONS_EARTH_TOKEN = "0xd9731Ac1557fb22c5b51B348aA06CA73B920b9c2";
 const PONS_EARTH_CURVE = "0x14ee0C70DF1f2A9eBA9aA375B1880fBD63911306";
 
 function requiredAddress(name, fallback) {

@@ -24,7 +24,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { BrowserProvider, Contract, JsonRpcProvider, keccak256, toUtf8Bytes } from "ethers";
 import CommunityFeeClaim from "@/components/CommunityFeeClaim";
 
-const EARTH_TOKEN_ADDRESS = "0xd9731Ac1557fb22c5b51b348aA06CA73B920b9c2";
+const EARTH_TOKEN_ADDRESS = "0xd9731Ac1557fb22c5b51B348aA06CA73B920b9c2";
 const PONS_EARTH_URL = `https://www.ponsfamily.com/launchpad/${EARTH_TOKEN_ADDRESS}`;
 const EXPLORER_TOKEN_URL = `https://robinhoodchain.blockscout.com/token/${EARTH_TOKEN_ADDRESS}`;
 const POINT_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_POINT_FACTORY_ADDRESS || "";
