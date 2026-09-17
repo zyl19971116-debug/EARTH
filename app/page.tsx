@@ -22,6 +22,7 @@ import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { toast, Toaster } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
 import { BrowserProvider, Contract, ContractFactory, JsonRpcProvider, keccak256, parseEther, toUtf8Bytes } from "ethers";
+import type { InterfaceAbi } from "ethers";
 import CommunityFeeClaim from "@/components/CommunityFeeClaim";
 
 const EARTH_TOKEN_ADDRESS = "0xd9731Ac1557fb22c5b51B348aA06CA73B920b9c2";
@@ -844,7 +845,7 @@ function MainnetDeploy() {
       const signerAddress = await signer.getAddress();
       if (signerAddress.toLowerCase() !== "0xba0ee0bc41407f797a88d7e12a922517a82ea599") throw new Error("Connect the configured main community wallet before deployment.");
       setStatus("Loading verified deployment bytecode…");
-      const payload = await fetch("/api/mainnet-deployment").then((response) => response.json()) as { abi: unknown[]; bytecode: string };
+      const payload = await fetch("/api/mainnet-deployment").then((response) => response.json()) as { abi: InterfaceAbi; bytecode: string };
       const factory = new ContractFactory(payload.abi, payload.bytecode, signer);
       setStatus("Confirm the deployment transaction in your wallet…");
       const deployment = await factory.deploy();
