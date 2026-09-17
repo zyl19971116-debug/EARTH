@@ -1007,7 +1007,7 @@ function TokenPage() {
   const tokenAddress = path.split("/").pop() || "";
   const tokens = useCityTokens();
   const token = tokens.find((item) => item.address.toLowerCase() === tokenAddress.toLowerCase());
-  const [amount, setAmount] = useState("0.001"), [quote, setQuote] = useState(""), [buying, setBuying] = useState(false), [account, setAccount] = useState(() => typeof window === "undefined" ? "" : localStorage.getItem("earth-account") || "");
+  const [amount, setAmount] = useState("0.001"), [quote, setQuote] = useState(""), [buying, setBuying] = useState(false), [account, setAccount] = useState(() => typeof window === "undefined" ? "" : localStorage.getItem("earth-account") || ""), [sellAmount, setSellAmount] = useState(""), [sellQuote, setSellQuote] = useState(""), [tokenBalance, setTokenBalance] = useState("0"), [selling, setSelling] = useState(false);
   useEffect(() => {
     const handleAccount = (event: Event) => setAccount((event as CustomEvent<string>).detail || "");
     window.addEventListener("earth-account-changed", handleAccount);
@@ -1018,6 +1018,17 @@ function TokenPage() {
     const curve = new Contract(process.env.NEXT_PUBLIC_BONDING_CURVE_ADDRESS || "", ["function getBuyPrice(address,uint256) view returns(uint256)"], new JsonRpcProvider(ROBINHOOD_CHAIN.rpcUrls[0]));
     curve.getBuyPrice(tokenAddress, parseEther(amount)).then((value: bigint) => setQuote(Number(formatUnits(value, 18)).toLocaleString(undefined, { maximumFractionDigits: 2 }))).catch(() => setQuote(""));
   }, [amount, tokenAddress]);
+  useEffect(() => {
+    if (!account || !isAddress(tokenAddress)) return setTokenBalance("0");
+    const cityToken = new Contract(tokenAddress, ["function balanceOf(address) view returns(uint256)"], new JsonRpcProvider(ROBINHOOD_CHAIN.rpcUrls[0]));
+    cityToken.balanceOf(account).then((value: bigint) => setTokenBalance(formatUnits(value, 18))).catch(() => setTokenBalance("0"));
+  }, [account, tokenAddress, buying, selling]);
+  useEffect(() => {
+    const curveAddress = process.env.NEXT_PUBLIC_BONDING_CURVE_ADDRESS || "";
+    if (!curveAddress || !isAddress(tokenAddress) || !sellAmount || Number(sellAmount) <= 0) return setSellQuote("");
+    const curve = new Contract(curveAddress, ["function getSellPrice(address,uint256) view returns(uint256)"], new JsonRpcProvider(ROBINHOOD_CHAIN.rpcUrls[0]));
+    curve.getSellPrice(tokenAddress, parseEther(sellAmount)).then((value: bigint) => setSellQuote(formatUnits(value, 18))).catch(() => setSellQuote(""));
+  }, [sellAmount, tokenAddress]);
   async function buyToken() {
     if (!account) { window.dispatchEvent(new Event("earth-open-wallet")); return; }
     const curveAddress = process.env.NEXT_PUBLIC_BONDING_CURVE_ADDRESS || "";
@@ -1037,6 +1048,33 @@ function TokenPage() {
     } catch (error) { toast.error(error instanceof Error ? error.message : "Purchase failed."); }
     finally { setBuying(false); }
   }
+  async function sellToken() {
+    if (!account) { window.dispatchEvent(new Event("earth-open-wallet")); return; }
+    const curveAddress = process.env.NEXT_PUBLIC_BONDING_CURVE_ADDRESS || "";
+    const injected = findWalletProvider(localStorage.getItem("earth-wallet") || "MetaMask");
+    if (!injected || !curveAddress || !isAddress(tokenAddress)) return toast.error("Wallet or city market is unavailable.");
+    try {
+      setSelling(true);
+      await ensureRobinhoodChain(injected);
+      const signer = await new BrowserProvider(injected as never).getSigner();
+      const tokenContract = new Contract(tokenAddress, ["function allowance(address,address) view returns(uint256)", "function approve(address,uint256) returns(bool)"], signer);
+      const curve = new Contract(curveAddress, ["function getSellPrice(address,uint256) view returns(uint256)", "function sell(address,uint256,uint256)"], signer);
+      const tokenAmount = parseEther(sellAmount);
+      if (tokenAmount > parseEther(tokenBalance)) throw new Error("Sell amount exceeds your wallet balance.");
+      const allowance = await tokenContract.allowance(account, curveAddress) as bigint;
+      if (allowance < tokenAmount) {
+        toast.info("Approve the city token first…");
+        await (await tokenContract.approve(curveAddress, tokenAmount)).wait();
+      }
+      const expected = await curve.getSellPrice(tokenAddress, tokenAmount) as bigint;
+      const tx = await curve.sell(tokenAddress, tokenAmount, expected * BigInt(95) / BigInt(100));
+      toast.info("Sale submitted. Waiting for confirmation…");
+      await tx.wait();
+      setSellAmount("");
+      toast.success(`Successfully sold $${token?.ticker || "CITY"}.`);
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Sale failed."); }
+    finally { setSelling(false); }
+  }
   return (
     <Shell>
       <main className="page">
@@ -1045,7 +1083,7 @@ function TokenPage() {
           title={token ? `${token.name} · $${token.ticker}` : "City Token"}
           text={token ? `Live city token on Robinhood Chain · ${token.address}` : "Loading verified city token data…"}
         />
-        {token ? <div className="tradepanel"><div><label>PAY WITH ETH</label><input type="number" min="0.001" step="0.001" value={amount} onChange={(event) => setAmount(event.target.value)} /><small>Minimum purchase: 0.001 ETH</small></div><ArrowRight/><div><label>ESTIMATED RECEIVE</label><strong>{quote ? `${quote} $${token.ticker}` : "—"}</strong><small>5% minimum-output protection is applied onchain.</small></div><button className="dark" disabled={buying || !quote} onClick={buyToken}>{!account ? "Connect Wallet to Buy" : buying ? "Buying…" : `Buy $${token.ticker}`}</button><a href={`https://robinhoodchain.blockscout.com/token/${token.address}`} target="_blank" rel="noreferrer">View verified contract ↗</a></div> : <VerifiedDataEmpty title="Loading city market" text="Reading this token directly from the deployed city factory." />}
+        {token ? <div className="tradepanel"><div><label>PAY WITH ETH</label><input type="number" min="0.001" step="0.001" value={amount} onChange={(event) => setAmount(event.target.value)} /><small>Minimum purchase: 0.001 ETH</small></div><ArrowRight/><div><label>ESTIMATED RECEIVE</label><strong>{quote ? `${quote} $${token.ticker}` : "—"}</strong><small>5% minimum-output protection is applied onchain.</small></div><button className="dark" disabled={buying || !quote} onClick={buyToken}>{!account ? "Connect Wallet to Buy" : buying ? "Buying…" : `Buy $${token.ticker}`}</button><div className="tradedivider"/><div><label>SELL ${token.ticker}</label><input type="number" min="0" step="any" placeholder="0" value={sellAmount} onChange={(event) => setSellAmount(event.target.value)} /><small>Wallet balance: {Number(tokenBalance).toLocaleString(undefined, { maximumFractionDigits: 4 })} ${token.ticker}</small></div><ArrowRight/><div><label>ESTIMATED RECEIVE</label><strong>{sellQuote ? `${Number(sellQuote).toLocaleString(undefined, { maximumFractionDigits: 6 })} ETH` : "—"}</strong><small>Approval is requested automatically when required.</small></div><button className="sellbutton" disabled={selling || !sellQuote} onClick={sellToken}>{!account ? "Connect Wallet to Sell" : selling ? "Selling…" : `Sell $${token.ticker}`}</button><a href={`https://robinhoodchain.blockscout.com/token/${token.address}`} target="_blank" rel="noreferrer">View verified contract ↗</a></div> : <VerifiedDataEmpty title="Loading city market" text="Reading this token directly from the deployed city factory." />}
       </main>
     </Shell>
   );
