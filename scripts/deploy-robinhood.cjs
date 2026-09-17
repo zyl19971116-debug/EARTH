@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const hre = require("hardhat");
+const configuredWallets = require("../config/robinhood-wallets.json");
 
-function requiredAddress(name) {
-  const value = process.env[name];
+function requiredAddress(name, fallback) {
+  const value = process.env[name] || fallback;
   if (!value || !hre.ethers.isAddress(value) || value === hre.ethers.ZeroAddress) {
     throw new Error(`${name} must be a non-zero address`);
   }
@@ -25,12 +26,11 @@ async function main() {
   }
 
   const [deployer] = await hre.ethers.getSigners();
-  const mainCommunityWallet = requiredAddress("MAIN_COMMUNITY_WALLET");
-  const buybackRecipient = requiredAddress("BUYBACK_RECIPIENT");
+  const mainCommunityWallet = requiredAddress("MAIN_COMMUNITY_WALLET", configuredWallets.mainCommunityWallet);
+  const buybackRecipient = requiredAddress("BUYBACK_RECIPIENT", configuredWallets.buybackRecipient);
   const dexRouter = requiredAddress("ROBINHOOD_DEX_ROUTER");
   const wrappedNative = requiredAddress("ROBINHOOD_WRAPPED_NATIVE");
-  const treasury = process.env.EARTH_TREASURY || deployer.address;
-  if (!hre.ethers.isAddress(treasury)) throw new Error("EARTH_TREASURY must be an address");
+  const treasury = requiredAddress("EARTH_TREASURY", configuredWallets.earthTreasury);
 
   const graduationCap = hre.ethers.parseEther(process.env.GRADUATION_MARKET_CAP_ETH || "30");
   const minimumTrade = hre.ethers.parseEther(process.env.MINIMUM_TRADE_ETH || "0.001");

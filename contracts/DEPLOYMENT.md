@@ -22,6 +22,12 @@ Copy `.env.robinhood.example` to a private environment file and replace every
 placeholder. The deployment script rejects missing or zero wallet/router
 addresses and refuses to run on any chain other than 4663 or 46630.
 
+The current default community, buyback-recipient and EARTH treasury wallet is
+`0xeD370d524dd0A883d7147d6dFdB1F9FE2ec77E26`, recorded in
+`config/robinhood-wallets.json`. Environment variables can override these roles
+before deployment. This is a public recipient address only; no private key is
+stored in the repository.
+
 ## Commands
 
 ```bash
