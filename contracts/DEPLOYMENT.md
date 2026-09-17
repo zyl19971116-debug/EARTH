@@ -55,6 +55,10 @@ contract bytecode and never deploys a replacement main token.
    buybackRecipient, minimumNativeTrade)`
 3. `PointFactory(bondingCurve)`
 4. One-time wiring of the executor and factory.
+5. `PointFactory.bindMainToken()` verifies the Pons EARTH contract bytecode and
+   permanently records the same address held by `BondingCurve`. Until this
+   transaction succeeds, every city-token launch reverts with
+   `main token not bound`; the bound address cannot be replaced.
 
 City creators call `PointFactory.launchCityToken{value: nativeSeed}(...)` from
 the wallet that should permanently receive the city community's 30% fee share.

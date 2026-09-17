@@ -27,6 +27,19 @@ async function main() {
 
   const factoryContract = await hre.ethers.getContractAt("PointFactory", cityFactoryAddress);
   const istKey = await factoryContract.cityKeyFor("IST");
+  await hre.ethers.provider.send("hardhat_impersonateAccount", [await deployment.getAddress()]);
+  await hre.ethers.provider.send("hardhat_setBalance", [await deployment.getAddress(), "0x38D7EA4C68000"]);
+  const deploymentSigner = await hre.ethers.getSigner(await deployment.getAddress());
+  try {
+    await factoryContract.connect(deploymentSigner).launchCityToken(istKey, "", "", { value: hre.ethers.parseEther("0.001") });
+    throw new Error("city launch was not blocked before main-token binding");
+  } catch (error) {
+    if (error instanceof Error && error.message === "city launch was not blocked before main-token binding") throw error;
+  }
+  await hre.ethers.provider.send("hardhat_stopImpersonatingAccount", [await deployment.getAddress()]);
+  await (await deployment.bindMainToken()).wait();
+  if (!(await factoryContract.mainTokenBound())) throw new Error("main token binding failed");
+  if ((await factoryContract.mainToken()) !== earthAddress) throw new Error("bound main token mismatch");
   await (await factoryContract.launchCityToken(istKey, "/cities/istanbul.png", "pull-payment test", { value: hre.ethers.parseEther("0.001") })).wait();
   const ist = await factoryContract.getCity(istKey);
   const claimBeforeCityTrade = await curve.claimableCommunityFees(wallet.address);

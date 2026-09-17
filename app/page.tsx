@@ -727,7 +727,7 @@ function Launch() {
             <p>
               <b>Fee split enforced by contract</b>
               <small>
-                50% buys back $EARTH, 30% supports city creator community building, and 20% supports main-token creator community building.
+                City launches open only after the Pons $EARTH contract is bound onchain. Fees then split 50% buyback, 30% city and 20% main community.
               </small>
             </p>
             <strong>50 / 30 / 20</strong>
@@ -740,7 +740,7 @@ function Launch() {
             </div>
           </div>
           <button className="dark submit" disabled={!selectedCity}>
-            {!selectedCity ? "Choose a City to Continue" : !launchAccount ? "Connect Wallet to Launch" : "Verified Contract Required"}
+            {!selectedCity ? "Choose a City to Continue" : !launchAccount ? "Connect Wallet to Launch" : "Pons $EARTH Binding Required"}
             <ArrowRight />
           </button>
         </form>

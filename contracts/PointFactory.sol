@@ -4,6 +4,8 @@ pragma solidity ^0.8.24;
 import "./PointToken.sol";
 
 interface ICityBondingCurve {
+    function earthToken() external view returns (address);
+
     function configureCity(
         address token,
         address cityDevWallet,
@@ -31,6 +33,9 @@ contract PointFactory {
     }
 
     ICityBondingCurve public immutable bondingCurve;
+    address public immutable owner;
+    address public mainToken;
+    bool public mainTokenBound;
     bytes32[] private cityKeys;
     mapping(bytes32 => City) private cities;
 
@@ -43,10 +48,12 @@ contract PointFactory {
         string symbol,
         string region
     );
+    event MainTokenBound(address indexed mainToken, address indexed owner);
 
     constructor(address bondingCurve_) {
         require(bondingCurve_ != address(0), "bonding curve");
         bondingCurve = ICityBondingCurve(bondingCurve_);
+        owner = msg.sender;
 
         _add("IST", "Istanbul", "Europe", "Hagia Sophia", 1);
         _add("MOW", "Moscow", "Europe", "Saint Basil's Cathedral", 2);
@@ -70,6 +77,18 @@ contract PointFactory {
         _add("SCL", "Santiago", "South America", "Gran Torre Santiago", 6);
     }
 
+    /// @notice One-time activation gate. City launches remain disabled until
+    /// the Pons-issued EARTH address in BondingCurve is confirmed onchain.
+    function bindMainToken() external {
+        require(msg.sender == owner, "owner");
+        require(!mainTokenBound, "main token already bound");
+        address token = bondingCurve.earthToken();
+        require(token != address(0) && token.code.length > 0, "invalid main token");
+        mainToken = token;
+        mainTokenBound = true;
+        emit MainTokenBound(token, msg.sender);
+    }
+
     /// @notice Launch a listed city and seed its curve with native currency.
     /// Reverts forever if the city has already been launched.
     function launchCityToken(
@@ -77,6 +96,7 @@ contract PointFactory {
         string calldata imageURI,
         string calldata description
     ) external payable returns (address tokenAddress) {
+        require(mainTokenBound, "main token not bound");
         City storage city = cities[cityKey];
         require(bytes(city.symbol).length != 0, "unknown city");
         require(!city.launched, "city already launched");

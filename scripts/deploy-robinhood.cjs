@@ -66,8 +66,12 @@ async function main() {
 
   await (await buyback.setBondingCurve(await curve.getAddress())).wait();
   await (await curve.setFactory(await factory.getAddress())).wait();
+  await (await factory.bindMainToken()).wait();
 
-  console.log("Wiring complete.");
+  if (!(await factory.mainTokenBound())) throw new Error("Pons EARTH binding failed");
+  if ((await factory.mainToken()).toLowerCase() !== earthToken.toLowerCase()) throw new Error("Bound main token mismatch");
+
+  console.log("Wiring and one-time Pons EARTH binding complete. City launches are enabled.");
   console.log("NEXT_PUBLIC_ROBINHOOD_CHAIN_ID=" + network.chainId);
   console.log("NEXT_PUBLIC_EARTH_TOKEN_ADDRESS=" + earthToken);
   console.log("NEXT_PUBLIC_BONDING_CURVE_ADDRESS=" + await curve.getAddress());

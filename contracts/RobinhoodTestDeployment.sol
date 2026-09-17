@@ -31,6 +31,11 @@ contract RobinhoodTestDeployment {
         testRouter.setSwapsEnabled(enabled);
     }
 
+    function bindMainToken() external {
+        require(msg.sender == communityWallet, "community wallet");
+        pointFactory.bindMainToken();
+    }
+
     constructor(address communityWallet_) payable {
         require(block.chainid == 46630, "Robinhood testnet only");
         require(communityWallet_ != address(0), "community wallet");
