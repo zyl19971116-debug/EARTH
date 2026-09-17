@@ -6,6 +6,7 @@ import {
   ChevronRight,
   Heart,
   Landmark,
+  LogOut,
   MapPin,
   Menu,
   Rocket,
@@ -232,6 +233,14 @@ function Shell({ children }: { children: React.ReactNode }) {
       setConnecting("");
     }
   }
+
+  function disconnectWallet() {
+    window.localStorage.removeItem("earth-wallet");
+    setAccount("");
+    publishConnectedAccount("");
+    setWallet(false);
+    toast.success("Wallet disconnected from EARTH ONLINE");
+  }
   return (
     <>
       <header>
@@ -296,7 +305,7 @@ function Shell({ children }: { children: React.ReactNode }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="between">
-              <h3>Connect a wallet</h3>
+              <h3>{account ? "Wallet connected" : "Connect a wallet"}</h3>
               <button
                 aria-label="Close wallet dialog"
                 onClick={() => setWallet(false)}
@@ -304,7 +313,18 @@ function Shell({ children }: { children: React.ReactNode }) {
                 <X />
               </button>
             </div>
-            <p>Choose a wallet to connect to Robinhood Chain.</p>
+            {account && (
+              <div className="connectedwallet">
+                <div>
+                  <small>CONNECTED ADDRESS</small>
+                  <b>{account.slice(0, 8)}…{account.slice(-6)}</b>
+                </div>
+                <button className="walletdisconnect" onClick={disconnectWallet}>
+                  <LogOut size={16} /> Disconnect
+                </button>
+              </div>
+            )}
+            <p>{account ? "Connect a different wallet, or disconnect this session." : "Choose a wallet to connect to Robinhood Chain."}</p>
             {["MetaMask", "Rabby", "Coinbase Wallet", "Phantom", "OKX Wallet"].map((w) => (
               <button
                 className="walletrow"
