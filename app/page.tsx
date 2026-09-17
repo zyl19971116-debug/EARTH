@@ -711,6 +711,7 @@ function Launch() {
         <form
           onSubmit={async (e) => {
             e.preventDefault();
+            const form = e.currentTarget;
             if (!selectedCity) return;
             if (!launchAccount) {
               window.dispatchEvent(new Event("earth-open-wallet"));
@@ -725,7 +726,7 @@ function Launch() {
               await ensureRobinhoodChain(injected);
               const signer = await new BrowserProvider(injected as never).getSigner();
               const factory = new Contract(POINT_FACTORY_ADDRESS, ["function launchCityToken(bytes32,string,string) payable returns(address)"], signer);
-              const data = new FormData(e.currentTarget);
+              const data = new FormData(form);
               const tx = await factory.launchCityToken(
                 keccak256(toUtf8Bytes(selectedCity.ticker)),
                 selectedCity.icon,
