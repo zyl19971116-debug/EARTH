@@ -21,7 +21,7 @@ import {
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { toast, Toaster } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
-import { BrowserProvider, Contract, JsonRpcProvider, keccak256, toUtf8Bytes } from "ethers";
+import { BrowserProvider, Contract, JsonRpcProvider, keccak256, parseEther, toUtf8Bytes } from "ethers";
 import CommunityFeeClaim from "@/components/CommunityFeeClaim";
 
 const EARTH_TOKEN_ADDRESS = "0xd9731Ac1557fb22c5b51B348aA06CA73B920b9c2";
@@ -729,7 +729,7 @@ function Launch() {
                 keccak256(toUtf8Bytes(selectedCity.ticker)),
                 selectedCity.icon,
                 String(data.get("description") || ""),
-                { value: 1000000000000000n },
+                { value: parseEther("0.001") },
               );
               toast.info("City launch submitted. Waiting for confirmation…");
               await tx.wait();
