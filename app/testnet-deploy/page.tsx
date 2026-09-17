@@ -5,6 +5,8 @@ import Link from "next/link";
 import { BrowserProvider, Contract, ContractFactory, formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers";
 import deploymentArtifact from "../../artifacts/contracts/RobinhoodTestDeployment.sol/RobinhoodTestDeployment.json";
 import factoryArtifact from "../../artifacts/contracts/PointFactory.sol/PointFactory.json";
+import curveArtifact from "../../artifacts/contracts/BondingCurve.sol/BondingCurve.json";
+import tokenArtifact from "../../artifacts/contracts/PointToken.sol/PointToken.json";
 
 type InjectedProvider = {
   request(args: { method: string; params?: unknown[] }): Promise<unknown>;
@@ -19,12 +21,15 @@ const chain = {
 };
 const activeTestDeployment = "0xf8F587be20c6fBB6Fb79Dc0866EC779f440E3c9f";
 const activePointFactory = "0x61F35B81333792ACa98a92a0207B622E2DC43d2F";
+const activeBondingCurve = "0x9D415D244434Dda6fd8fFcb8406BB42c8A2a075e";
+const istToken = "0xB0c9c89b428Ee59E206Ea3CAab6d37304774E9FA";
 
 export default function TestnetDeploy() {
   const [status, setStatus] = useState("Connect the funded wallet to begin."),
     [account, setAccount] = useState(""),
     [deployment, setDeployment] = useState(""),
     [cityToken, setCityToken] = useState(""),
+    [istBalance, setIstBalance] = useState(""),
     [busy, setBusy] = useState(false);
 
   async function connect() {
@@ -41,6 +46,66 @@ export default function TestnetDeploy() {
     setAccount(accounts[0]);
     setStatus("Wallet connected. Review the testnet warning before deploying.");
     return accounts[0];
+  }
+
+  async function tradingContracts() {
+    const selected = account || await connect();
+    const injected = (window as unknown as { ethereum?: InjectedProvider }).ethereum;
+    if (!injected) throw new Error("Wallet provider unavailable.");
+    const provider = new BrowserProvider(injected);
+    if ((await provider.getNetwork()).chainId !== BigInt(46630)) throw new Error("Wallet is not on Robinhood Chain Testnet.");
+    const signer = await provider.getSigner();
+    return {
+      selected,
+      curve: new Contract(activeBondingCurve, curveArtifact.abi, signer),
+      token: new Contract(istToken, tokenArtifact.abi, signer),
+    };
+  }
+
+  async function refreshIstBalance() {
+    const { selected, token } = await tradingContracts();
+    const balance = await token.balanceOf(selected);
+    setIstBalance(formatEther(balance));
+    return balance as bigint;
+  }
+
+  async function buyIst() {
+    setBusy(true);
+    try {
+      const { selected, curve, token } = await tradingContracts();
+      const value = parseEther("0.00002");
+      const quote = await curve.getBuyPrice(istToken, value) as bigint;
+      setStatus("Confirm the $IST TESTNET buy in your wallet.");
+      const tx = await curve.buy(istToken, quote * BigInt(99) / BigInt(100), { value });
+      setStatus("Buy submitted. Waiting for testnet confirmation…");
+      await tx.wait();
+      setIstBalance(formatEther(await token.balanceOf(selected)));
+      setStatus("$IST buy succeeded. The 2% tax distribution was emitted onchain.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Buy failed or was rejected.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sellIst() {
+    setBusy(true);
+    try {
+      const { selected, curve, token } = await tradingContracts();
+      const balance = await token.balanceOf(selected) as bigint;
+      if (balance === BigInt(0)) throw new Error("Buy $IST before testing a sell.");
+      setStatus("First confirm the $IST approval in your wallet.");
+      await (await token.approve(activeBondingCurve, balance)).wait();
+      const quote = await curve.getSellPrice(istToken, balance) as bigint;
+      setStatus("Approval confirmed. Now confirm the $IST sell transaction.");
+      await (await curve.sell(istToken, balance, quote * BigInt(99) / BigInt(100))).wait();
+      setIstBalance(formatEther(await token.balanceOf(selected)));
+      setStatus("$IST sell succeeded. The 2% tax distribution was emitted onchain.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Sell failed or was rejected.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function launchFirstCity() {
@@ -135,6 +200,17 @@ export default function TestnetDeploy() {
         <button disabled={busy} onClick={launchFirstCity} style={{ border: 0, borderRadius: 12, padding: "15px 22px", background: "#14a36d", color: "white", fontWeight: 800, cursor: "pointer" }}>
           {busy ? "Waiting for wallet…" : "Launch Istanbul Test Token"}
         </button>
+      </div>
+      <div style={{ padding: 20, marginTop: 20, border: "1px solid #d8dfdc", borderRadius: 16 }}>
+        <h2>Test $IST trading and fixed tax</h2>
+        <p><b>Trade:</b> 0.00002 test ETH → $IST</p>
+        <p><b>Tax:</b> 2% fixed · 50% EARTH buyback · 30% city community · 20% main community</p>
+        <p><b>Your IST balance:</b> {istBalance || "Click refresh"}</p>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+          <button disabled={busy} onClick={refreshIstBalance} style={{ border: "1px solid #0c241c", borderRadius: 12, padding: "14px 18px", background: "white", color: "#0c241c", fontWeight: 800 }}>Refresh Balance</button>
+          <button disabled={busy} onClick={buyIst} style={{ border: 0, borderRadius: 12, padding: "14px 18px", background: "#14a36d", color: "white", fontWeight: 800 }}>Buy $IST</button>
+          <button disabled={busy} onClick={sellIst} style={{ border: 0, borderRadius: 12, padding: "14px 18px", background: "#0c241c", color: "white", fontWeight: 800 }}>Approve & Sell All $IST</button>
+        </div>
       </div>
     </main>
   );
