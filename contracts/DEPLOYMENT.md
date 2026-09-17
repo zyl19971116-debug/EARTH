@@ -67,5 +67,11 @@ withdraw. A recipient that cannot receive ETH therefore cannot block trading.
 The website renders the claim control only when the connected address matches a
 launched city's immutable creator address.
 
+Buybacks are attempted during each trade. If the DEX route, liquidity or
+slippage check fails, the trade continues and the 50% buyback share is recorded
+in `pendingBuybackNative`. Anyone can later call `executePendingBuyback` for a
+partial or full pending amount. A failed retry leaves the pending balance intact.
+`BuybackDeferred` and `DeferredBuybackExecuted` provide an auditable lifecycle.
+
 The tax applies to trades executed through `BondingCurve`. Plain ERC-20 wallet
 transfers or unrelated third-party markets are not taxed by this architecture.

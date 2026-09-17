@@ -26,6 +26,11 @@ contract RobinhoodTestDeployment {
         address pointFactory
     );
 
+    function setTestRouterEnabled(bool enabled) external {
+        require(msg.sender == communityWallet, "community wallet");
+        testRouter.setSwapsEnabled(enabled);
+    }
+
     constructor(address communityWallet_) payable {
         require(block.chainid == 46630, "Robinhood testnet only");
         require(communityWallet_ != address(0), "community wallet");

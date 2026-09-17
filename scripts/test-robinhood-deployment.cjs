@@ -26,10 +26,15 @@ async function main() {
   await (await factoryContract.launchCityToken(istKey, "/cities/istanbul.png", "pull-payment test", { value: hre.ethers.parseEther("0.001") })).wait();
   const ist = await factoryContract.getCity(istKey);
   const claimBeforeCityTrade = await curve.claimableCommunityFees(wallet.address);
+  await (await deployment.setTestRouterEnabled(false)).wait();
   const cityQuote = await curve.getBuyPrice(ist.token, hre.ethers.parseEther("0.0001"));
   await (await curve.buy(ist.token, cityQuote * 99n / 100n, { value: hre.ethers.parseEther("0.0001") })).wait();
   const expectedClaim = hre.ethers.parseEther("0.000001");
   if ((await curve.claimableCommunityFees(wallet.address)) - claimBeforeCityTrade !== expectedClaim) throw new Error("community accrual mismatch");
+  if (await curve.pendingBuybackNative() !== hre.ethers.parseEther("0.000001")) throw new Error("deferred buyback mismatch");
+  await (await deployment.setTestRouterEnabled(true)).wait();
+  await (await curve.executePendingBuyback(await curve.pendingBuybackNative())).wait();
+  if (await curve.pendingBuybackNative() !== 0n) throw new Error("deferred buyback execution failed");
   await (await curve.claimCommunityFees(wallet.address)).wait();
   if (await curve.claimableCommunityFees(wallet.address) !== 0n) throw new Error("community claim failed");
 

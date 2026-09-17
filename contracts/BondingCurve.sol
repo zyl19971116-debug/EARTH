@@ -36,6 +36,7 @@ contract BondingCurve {
     mapping(address => bool) public graduated;
     mapping(address => TokenConfig) public tokenConfig;
     mapping(address => uint256) public claimableCommunityFees;
+    uint256 public pendingBuybackNative;
     uint256 private locked = 1;
 
     event TokenConfigured(address indexed token, TokenType tokenType, address indexed cityDevWallet);
@@ -43,6 +44,8 @@ contract BondingCurve {
     event TaxDistributed(address indexed token, uint256 totalTax, uint256 earthBuyback, uint256 cityCommunity, uint256 mainCommunity);
     event CommunityFeeAccrued(address indexed wallet, address indexed token, uint256 amount, bool cityShare);
     event CommunityFeesClaimed(address indexed wallet, address indexed recipient, uint256 amount);
+    event BuybackDeferred(address indexed token, uint256 amount);
+    event DeferredBuybackExecuted(address indexed caller, uint256 nativeSpent, uint256 earthBought);
     event Graduated(address indexed token);
 
     modifier onlyOwner() { require(msg.sender == owner, "owner"); _; }
@@ -169,9 +172,23 @@ contract BondingCurve {
         }
         claimableCommunityFees[mainDevWallet] += mainAmount;
         emit CommunityFeeAccrued(mainDevWallet, token, mainAmount, false);
-        uint256 earthBought = buybackExecutor.buyback{value: buybackAmount}(earthToken, buybackRecipient);
-        require(earthBought > 0, "buyback failed");
+        try buybackExecutor.buyback{value: buybackAmount}(earthToken, buybackRecipient) returns (uint256 earthBought) {
+            require(earthBought > 0, "buyback failed");
+        } catch {
+            pendingBuybackNative += buybackAmount;
+            emit BuybackDeferred(token, buybackAmount);
+        }
         emit TaxDistributed(token, tax, buybackAmount, cityAmount, mainAmount);
+    }
+
+    /// @notice Anyone may retry some or all deferred buyback funds. A failed
+    /// retry reverts and therefore leaves the pending balance unchanged.
+    function executePendingBuyback(uint256 amount) external nonReentrant returns (uint256 earthBought) {
+        require(amount > 0 && amount <= pendingBuybackNative, "pending amount");
+        pendingBuybackNative -= amount;
+        earthBought = buybackExecutor.buyback{value: amount}(earthToken, buybackRecipient);
+        require(earthBought > 0, "buyback failed");
+        emit DeferredBuybackExecuted(msg.sender, amount, earthBought);
     }
 
     /// @notice Pull accrued community fees without blocking user trades when a
