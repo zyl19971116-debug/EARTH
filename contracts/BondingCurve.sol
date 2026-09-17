@@ -16,7 +16,7 @@ interface IEarthBuybackExecutor {
 contract BondingCurve {
     uint256 public constant BPS_DENOMINATOR = 10_000;
     uint256 public constant TRADE_TAX_BPS = 200; // Fixed 2% buy/sell tax.
-    uint256 public constant BUYBACK_SHARE_BPS = 5_000;
+    uint256 public constant CITY_BUYBACK_SHARE_BPS = 5_000;
     uint256 public constant CITY_DEV_SHARE_BPS = 3_000;
 
     enum TokenType { Unconfigured, Earth, City }
@@ -75,7 +75,8 @@ contract BondingCurve {
         owner = msg.sender;
     }
 
-    /// @notice EARTH 2% tax: 50% buyback, 50% main community.
+    /// @notice EARTH 2% tax: 100% main community, for ecosystem development
+    /// and support of city-token communities.
     function setFactory(address factory_) external onlyOwner {
         require(factory == address(0), "factory already set");
         require(factory_ != address(0), "factory");
@@ -158,12 +159,13 @@ contract BondingCurve {
     }
 
     function _distributeTax(address token, uint256 tax) internal {
-        uint256 buybackAmount = tax * BUYBACK_SHARE_BPS / BPS_DENOMINATOR;
+        uint256 buybackAmount;
         uint256 cityAmount;
         uint256 mainAmount;
         if (tokenConfig[token].tokenType == TokenType.Earth) {
-            mainAmount = tax - buybackAmount;
+            mainAmount = tax;
         } else {
+            buybackAmount = tax * CITY_BUYBACK_SHARE_BPS / BPS_DENOMINATOR;
             cityAmount = tax * CITY_DEV_SHARE_BPS / BPS_DENOMINATOR;
             mainAmount = tax - buybackAmount - cityAmount;
             address cityWallet = tokenConfig[token].cityDevWallet;
@@ -172,11 +174,13 @@ contract BondingCurve {
         }
         claimableCommunityFees[mainDevWallet] += mainAmount;
         emit CommunityFeeAccrued(mainDevWallet, token, mainAmount, false);
-        try buybackExecutor.buyback{value: buybackAmount}(earthToken, buybackRecipient) returns (uint256 earthBought) {
-            require(earthBought > 0, "buyback failed");
-        } catch {
-            pendingBuybackNative += buybackAmount;
-            emit BuybackDeferred(token, buybackAmount);
+        if (buybackAmount > 0) {
+            try buybackExecutor.buyback{value: buybackAmount}(earthToken, buybackRecipient) returns (uint256 earthBought) {
+                require(earthBought > 0, "buyback failed");
+            } catch {
+                pendingBuybackNative += buybackAmount;
+                emit BuybackDeferred(token, buybackAmount);
+            }
         }
         emit TaxDistributed(token, tax, buybackAmount, cityAmount, mainAmount);
     }

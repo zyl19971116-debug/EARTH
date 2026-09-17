@@ -489,12 +489,12 @@ function Home() {
           <div className="flytitle">
             <label>PROTOCOL FLYWHEEL</label>
             <h2>Two tokens. Two transparent fee routes.</h2>
-            <p>Every trading fee strengthens $EARTH and funds community development.</p>
+            <p>Main-token fees build the ecosystem; city-token fees support creators and $EARTH.</p>
           </div>
           <div className="splitcard buyback">
             <small>$EARTH MAIN TOKEN</small>
-            <strong>50% Buyback · 50% Main DEV</strong>
-            <p>Half supports market buybacks; half funds the main ecosystem community wallet.</p>
+            <strong>100% Ecosystem Community</strong>
+            <p>The fixed 2% fee funds community building and support programs for city-token communities.</p>
           </div>
           <ArrowRight className="splitarrow" />
           <div className="splitcard community">
