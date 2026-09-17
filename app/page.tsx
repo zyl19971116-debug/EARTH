@@ -21,7 +21,7 @@ import {
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { toast, Toaster } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
-import { BrowserProvider, Contract, JsonRpcProvider, keccak256, parseEther, toUtf8Bytes } from "ethers";
+import { BrowserProvider, Contract, ContractFactory, JsonRpcProvider, keccak256, parseEther, toUtf8Bytes } from "ethers";
 import CommunityFeeClaim from "@/components/CommunityFeeClaim";
 
 const EARTH_TOKEN_ADDRESS = "0xd9731Ac1557fb22c5b51B348aA06CA73B920b9c2";
@@ -831,6 +831,38 @@ function Field({ name, placeholder }: { name: string; placeholder: string }) {
     </label>
   );
 }
+function MainnetDeploy() {
+  const [status, setStatus] = useState("Ready to deploy"), [result, setResult] = useState<{ deployment: string; curve: string; factory: string; executor: string; tx: string } | null>(null), [busy, setBusy] = useState(false);
+  async function deploy() {
+    const walletName = localStorage.getItem("earth-wallet") || "MetaMask";
+    const injected = findWalletProvider(walletName);
+    if (!injected) return toast.error("Connect the deployment wallet first.");
+    try {
+      setBusy(true);
+      await ensureRobinhoodChain(injected);
+      const signer = await new BrowserProvider(injected as never).getSigner();
+      const signerAddress = await signer.getAddress();
+      if (signerAddress.toLowerCase() !== "0xba0ee0bc41407f797a88d7e12a922517a82ea599") throw new Error("Connect the configured main community wallet before deployment.");
+      setStatus("Loading verified deployment bytecode…");
+      const payload = await fetch("/api/mainnet-deployment").then((response) => response.json()) as { abi: unknown[]; bytecode: string };
+      const factory = new ContractFactory(payload.abi, payload.bytecode, signer);
+      setStatus("Confirm the deployment transaction in your wallet…");
+      const deployment = await factory.deploy();
+      const tx = deployment.deploymentTransaction();
+      setStatus("Transaction submitted. Waiting for mainnet confirmation…");
+      await deployment.waitForDeployment();
+      const deploymentAddress = await deployment.getAddress();
+      const deployed = new Contract(deploymentAddress, ["function buybackExecutor() view returns(address)", "function bondingCurve() view returns(address)", "function pointFactory() view returns(address)"], signer);
+      setResult({ deployment: deploymentAddress, executor: await deployed.buybackExecutor(), curve: await deployed.bondingCurve(), factory: await deployed.pointFactory(), tx: tx?.hash || "" });
+      setStatus("Deployment and $EARTH binding completed.");
+      toast.success("City-token contracts deployed and bound successfully.");
+    } catch (error) {
+      setStatus("Deployment was not completed.");
+      toast.error(error instanceof Error ? error.message : "Deployment failed.");
+    } finally { setBusy(false); }
+  }
+  return <Shell><main className="page"><Title eyebrow="MAINNET ACTIVATION" title="Deploy City Launchpad" text="One wallet signature deploys the fixed contracts and binds the verified Pons $EARTH token." /><div className="deploypanel"><div className="deploymentnotice"><ShieldCheck size={20}/><div><b>{status}</b><small>Robinhood Chain · Chain ID 4663 · $EARTH 0xd973…b9c2 · Community wallet 0xbA0e…A599</small></div></div><button className="dark submit" disabled={busy || Boolean(result)} onClick={deploy}>{busy ? "Waiting for wallet…" : result ? "Deployment Complete" : "Deploy & Bind $EARTH"}<ArrowRight size={17}/></button>{result && <div className="deployresult"><b>Save these verified mainnet addresses</b><p>Deployment: {result.deployment}</p><p>Buyback executor: {result.executor}</p><p>Bonding curve: {result.curve}</p><p>City factory: {result.factory}</p><a href={`https://robinhoodchain.blockscout.com/tx/${result.tx}`} target="_blank" rel="noreferrer">View transaction ↗</a></div>}</div></main></Shell>;
+}
 function PointsProgram() {
   const tiers = [
     { name: "Visitor", amount: "1+", benefit: "City passport stamp", color: "#8D9AAA" },
@@ -1060,6 +1092,7 @@ export default function App() {
     return () => controller.abort();
   }, []);
   if (p === "/launch") return <Launch />;
+  if (p === "/mainnet-deploy") return <MainnetDeploy />;
   if (p === "/points") return <PointsProgram />;
   if (p === "/explore") return <Explore />;
   if (p === "/milestones") return <Explore mile />;
