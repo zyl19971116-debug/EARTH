@@ -19,8 +19,8 @@ Robinhood Chain is EVM-compatible and uses ETH for gas.
 ## Configuration
 
 Copy `.env.robinhood.example` to a private environment file and replace every
-placeholder. The deployment script rejects missing or zero wallet/router
-addresses and refuses to run on any chain other than 4663 or 46630.
+placeholder. The production deployment script rejects missing or zero wallet
+addresses and refuses to run on any chain other than Robinhood mainnet 4663.
 
 The current default community, buyback-recipient and EARTH treasury wallet is
 `0xeD370d524dd0A883d7147d6dFdB1F9FE2ec77E26`, recorded in
@@ -32,10 +32,15 @@ stored in the repository.
 
 ```bash
 npm run contracts:compile
-npm run contracts:deploy:robinhood-testnet
-# Mainnet only after testnet validation and audit:
+# Mainnet only after independent audit and final parameter review:
 npm run contracts:deploy:robinhood
 ```
+
+The production script defaults to the official Robinhood Chain Uniswap V2
+Router02 `0x89e5db8b5aa49aa85ac63f691524311aeb649eba` and WETH
+`0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73`. Before deploying any EARTH
+contract, it checks that both addresses contain code and that the router's
+`WETH()` result matches the configured wrapped-native address.
 
 ## Deployment order performed by the script
 

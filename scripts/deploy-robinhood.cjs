@@ -2,6 +2,10 @@
 const hre = require("hardhat");
 const configuredWallets = require("../config/robinhood-wallets.json");
 
+const ROBINHOOD_MAINNET_CHAIN_ID = 4663n;
+const UNISWAP_V2_ROUTER = "0x89e5db8b5aa49aa85ac63f691524311aeb649eba";
+const WETH = "0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73";
+
 function requiredAddress(name, fallback) {
   const value = process.env[name] || fallback;
   if (!value || !hre.ethers.isAddress(value) || value === hre.ethers.ZeroAddress) {
@@ -21,15 +25,15 @@ async function deploy(name, args) {
 
 async function main() {
   const network = await hre.ethers.provider.getNetwork();
-  if (network.chainId !== 4663n && network.chainId !== 46630n) {
-    throw new Error(`Refusing unsupported chain ${network.chainId}`);
+  if (network.chainId !== ROBINHOOD_MAINNET_CHAIN_ID) {
+    throw new Error(`Mainnet deployment requires Robinhood Chain ID 4663; connected to ${network.chainId}`);
   }
 
   const [deployer] = await hre.ethers.getSigners();
   const mainCommunityWallet = requiredAddress("MAIN_COMMUNITY_WALLET", configuredWallets.mainCommunityWallet);
   const buybackRecipient = requiredAddress("BUYBACK_RECIPIENT", configuredWallets.buybackRecipient);
-  const dexRouter = requiredAddress("ROBINHOOD_DEX_ROUTER");
-  const wrappedNative = requiredAddress("ROBINHOOD_WRAPPED_NATIVE");
+  const dexRouter = requiredAddress("ROBINHOOD_DEX_ROUTER", UNISWAP_V2_ROUTER);
+  const wrappedNative = requiredAddress("ROBINHOOD_WRAPPED_NATIVE", WETH);
   const treasury = requiredAddress("EARTH_TREASURY", configuredWallets.earthTreasury);
 
   const graduationCap = hre.ethers.parseEther(process.env.GRADUATION_MARKET_CAP_ETH || "30");
@@ -38,6 +42,14 @@ async function main() {
 
   console.log(`Network chain ID: ${network.chainId}`);
   console.log(`Deployer: ${deployer.address}`);
+
+  if ((await hre.ethers.provider.getCode(dexRouter)) === "0x") throw new Error("DEX router has no mainnet code");
+  if ((await hre.ethers.provider.getCode(wrappedNative)) === "0x") throw new Error("WETH has no mainnet code");
+  const router = new hre.ethers.Contract(dexRouter, ["function WETH() view returns (address)"], hre.ethers.provider);
+  const routerWeth = await router.WETH();
+  if (routerWeth.toLowerCase() !== wrappedNative.toLowerCase()) throw new Error("Router WETH mismatch");
+  console.log(`Verified Uniswap V2 Router02: ${dexRouter}`);
+  console.log(`Verified WETH: ${wrappedNative}`);
 
   const earth = await deploy("EarthToken", [treasury]);
   const buyback = await deploy("EarthBuybackExecutor", [dexRouter, wrappedNative, slippageBps]);

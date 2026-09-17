@@ -21,10 +21,5 @@ module.exports = {
       chainId: 4663,
       accounts: privateKey ? [privateKey] : [],
     },
-    robinhoodTestnet: {
-      url: process.env.ROBINHOOD_TESTNET_RPC_URL || "https://rpc.testnet.chain.robinhood.com",
-      chainId: 46630,
-      accounts: privateKey ? [privateKey] : [],
-    },
   },
 };

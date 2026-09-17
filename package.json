@@ -13,7 +13,6 @@
     "contracts:compile": "hardhat compile --config hardhat.config.cjs",
     "contracts:test:robinhood": "hardhat run --config hardhat.config.cjs scripts/test-robinhood-deployment.cjs --network hardhat",
     "contracts:deploy:robinhood": "hardhat run --config hardhat.config.cjs scripts/deploy-robinhood.cjs --network robinhood",
-    "contracts:deploy:robinhood-testnet": "hardhat run --config hardhat.config.cjs scripts/deploy-robinhood.cjs --network robinhoodTestnet",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate"
   },
