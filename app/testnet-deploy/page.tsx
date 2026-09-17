@@ -47,7 +47,7 @@ export default function TestnetDeploy() {
       if (!injected) throw new Error("Wallet provider unavailable.");
       const provider = new BrowserProvider(injected);
       const network = await provider.getNetwork();
-      if (network.chainId !== 46630n) throw new Error("Wallet is not on Robinhood Chain Testnet.");
+      if (network.chainId !== BigInt(46630)) throw new Error("Wallet is not on Robinhood Chain Testnet.");
       const balance = await provider.getBalance(selected);
       if (balance < parseEther("0.003")) throw new Error(`At least 0.003 test ETH is recommended. Current balance: ${formatEther(balance)} ETH`);
       setStatus("Confirm the single TESTNET deployment transaction in your wallet.");
