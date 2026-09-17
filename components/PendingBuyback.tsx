@@ -15,7 +15,7 @@ const curveAbi = [
 type InjectedProvider = { request(args: { method: string; params?: unknown[] }): Promise<unknown> };
 
 export default function PendingBuyback() {
-  const [pending, setPending] = useState(0n);
+  const [pending, setPending] = useState(BigInt(0));
   const [loading, setLoading] = useState(false);
 
   async function refresh() {
@@ -43,7 +43,7 @@ export default function PendingBuyback() {
     };
   }, []);
 
-  if (!curveAddress || pending === 0n) return null;
+  if (!curveAddress || pending === BigInt(0)) return null;
 
   async function execute() {
     const injected = (window as unknown as { ethereum?: InjectedProvider }).ethereum;
@@ -57,8 +57,8 @@ export default function PendingBuyback() {
       const signer = await new BrowserProvider(injected).getSigner();
       const curve = new Contract(curveAddress, curveAbi, signer);
       const latest = await curve.pendingBuybackNative() as bigint;
-      if (latest === 0n) {
-        setPending(0n);
+      if (latest === BigInt(0)) {
+        setPending(BigInt(0));
         return toast.success("The pending buyback was already executed.");
       }
       const tx = await curve.executePendingBuyback(latest);
