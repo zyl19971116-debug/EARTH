@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "EARTH//ONLINE — The City Token Launchpad",
+  title: "EARTH ONLINE — The City Token Launchpad",
   description: "Launch, discover and trade community-owned city tokens.",
   other: {
     "codex-preview": "development",
   },
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/earth-token.png",
+    shortcut: "/earth-token.png",
   },
 };
 

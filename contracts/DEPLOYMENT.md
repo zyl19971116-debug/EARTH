@@ -9,7 +9,10 @@
 7. Transfer the EARTH amount reserved for its curve to `BondingCurve`, then call
    `configureEarth{value: nativeSeed}(nativeSeed, earthTokenReserve)`.
 
-City creators call `PointFactory.launchCityToken{value: nativeSeed}(...)`.
+City creators call `PointFactory.launchCityToken{value: nativeSeed}(...)` from
+the wallet that should receive the city creator's 30% fee share. The factory
+uses `msg.sender` as the immutable city community wallet; no separate recipient
+address can be supplied.
 The factory rejects an unknown city and permanently rejects a second launch of
 the same city. `getAvailableCities()` is the source of truth for the website.
 

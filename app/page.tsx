@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import {
   ArrowRight,
   BarChart3,
-  Check,
   ChevronRight,
   Heart,
   Landmark,
@@ -21,6 +20,27 @@ import {
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { toast, Toaster } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
+
+type EthereumProvider = {
+  request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+  on?: (event: string, handler: (...args: unknown[]) => void) => void;
+  removeListener?: (event: string, handler: (...args: unknown[]) => void) => void;
+  providers?: EthereumProvider[];
+  isMetaMask?: boolean;
+  isRabby?: boolean;
+  isCoinbaseWallet?: boolean;
+  isPhantom?: boolean;
+  isOkxWallet?: boolean;
+  isOKExWallet?: boolean;
+};
+
+declare global {
+  interface Window {
+    ethereum?: EthereumProvider;
+    phantom?: { ethereum?: EthereumProvider };
+    okxwallet?: EthereumProvider;
+  }
+}
 
 function Link({
   href,
@@ -58,33 +78,34 @@ type LaunchCity = {
 };
 
 const launchCities: LaunchCity[] = [
-  { name: "Istanbul", ticker: "IST", region: "Europe", landmark: "Hagia Sophia", icon: "🕌", rank: 1 },
-  { name: "Moscow", ticker: "MOW", region: "Europe", landmark: "Saint Basil's Cathedral", icon: "⛪", rank: 2 },
-  { name: "London", ticker: "LDN", region: "Europe", landmark: "Big Ben", icon: "🕰️", rank: 3 },
-  { name: "Paris", ticker: "PAR", region: "Europe", landmark: "Eiffel Tower", icon: "🗼", rank: 4 },
-  { name: "Madrid", ticker: "MAD", region: "Europe", landmark: "Puerta de Alcalá", icon: "🏛️", rank: 5 },
-  { name: "Barcelona", ticker: "BCN", region: "Europe", landmark: "Sagrada Família", icon: "⛪", rank: 6 },
-  { name: "Mexico City", ticker: "MEX", region: "North America", landmark: "Angel of Independence", icon: "🪽", rank: 1 },
-  { name: "New York City", ticker: "NYC", region: "North America", landmark: "Statue of Liberty", icon: "🗽", rank: 2 },
-  { name: "Los Angeles", ticker: "LAX", region: "North America", landmark: "Hollywood Sign", icon: "🎬", rank: 3 },
-  { name: "Toronto", ticker: "TOR", region: "North America", landmark: "CN Tower", icon: "🗼", rank: 4 },
-  { name: "Santo Domingo", ticker: "SDQ", region: "North America", landmark: "Columbus Lighthouse", icon: "🏛️", rank: 5 },
-  { name: "Guadalajara", ticker: "GDL", region: "North America", landmark: "Guadalajara Cathedral", icon: "⛪", rank: 6 },
-  { name: "São Paulo", ticker: "SAO", region: "South America", landmark: "Altino Arantes Building", icon: "🏙️", rank: 1 },
-  { name: "Buenos Aires", ticker: "BUE", region: "South America", landmark: "Obelisk", icon: "🏛️", rank: 2 },
-  { name: "Bogotá", ticker: "BOG", region: "South America", landmark: "Monserrate", icon: "⛰️", rank: 3 },
-  { name: "Lima", ticker: "LIM", region: "South America", landmark: "Plaza Mayor", icon: "⛲", rank: 4 },
-  { name: "Rio de Janeiro", ticker: "RIO", region: "South America", landmark: "Christ the Redeemer", icon: "🗿", rank: 5 },
-  { name: "Santiago", ticker: "SCL", region: "South America", landmark: "Gran Torre Santiago", icon: "🏙️", rank: 6 },
+  { name: "Istanbul", ticker: "IST", region: "Europe", landmark: "Hagia Sophia", icon: "/cities/istanbul.png", rank: 1 },
+  { name: "Moscow", ticker: "MOW", region: "Europe", landmark: "Saint Basil's Cathedral", icon: "/cities/moscow.png", rank: 2 },
+  { name: "London", ticker: "LDN", region: "Europe", landmark: "Big Ben", icon: "/cities/london.png", rank: 3 },
+  { name: "Paris", ticker: "PAR", region: "Europe", landmark: "Eiffel Tower", icon: "/cities/paris.png", rank: 4 },
+  { name: "Madrid", ticker: "MAD", region: "Europe", landmark: "Puerta de Alcalá", icon: "/cities/madrid.png", rank: 5 },
+  { name: "Barcelona", ticker: "BCN", region: "Europe", landmark: "Sagrada Família", icon: "/cities/barcelona.png", rank: 6 },
+  { name: "Mexico City", ticker: "MEX", region: "North America", landmark: "Angel of Independence", icon: "/cities/mexico-city.png", rank: 1 },
+  { name: "New York City", ticker: "NYC", region: "North America", landmark: "Statue of Liberty", icon: "/cities/new-york.png", rank: 2 },
+  { name: "Los Angeles", ticker: "LAX", region: "North America", landmark: "Hollywood Sign", icon: "/cities/los-angeles.png", rank: 3 },
+  { name: "Toronto", ticker: "TOR", region: "North America", landmark: "CN Tower", icon: "/cities/toronto.png", rank: 4 },
+  { name: "Santo Domingo", ticker: "SDQ", region: "North America", landmark: "Columbus Lighthouse", icon: "/cities/santo-domingo.png", rank: 5 },
+  { name: "Guadalajara", ticker: "GDL", region: "North America", landmark: "Guadalajara Cathedral", icon: "/cities/guadalajara.png", rank: 6 },
+  { name: "São Paulo", ticker: "SAO", region: "South America", landmark: "Altino Arantes Building", icon: "/cities/sao-paulo.png", rank: 1 },
+  { name: "Buenos Aires", ticker: "BUE", region: "South America", landmark: "Obelisk", icon: "/cities/buenos-aires.png", rank: 2 },
+  { name: "Bogotá", ticker: "BOG", region: "South America", landmark: "Monserrate", icon: "/cities/bogota.png", rank: 3 },
+  { name: "Lima", ticker: "LIM", region: "South America", landmark: "Plaza Mayor", icon: "/cities/lima.png", rank: 4 },
+  { name: "Rio de Janeiro", ticker: "RIO", region: "South America", landmark: "Christ the Redeemer", icon: "/cities/rio.png", rank: 5 },
+  { name: "Santiago", ticker: "SCL", region: "South America", landmark: "Gran Torre Santiago", icon: "/cities/santiago.png", rank: 6 },
 ];
 const tokens: Token[] = [];
 const milestones: Array<{ name: string; ticker: string; cap: string; change: string; progress: number }> = [];
 function Logo() {
   return (
-    <Link href="/" className="logo">
-      <i>E</i>
-      <b>
-        EARTH<span>//</span>ONLINE
+    <Link href="/" className="logo" aria-label="EARTH ONLINE home">
+      <span className="logoMark"><img src="/earth-token.png" alt="" /></span>
+      <b className="wordmark">
+        <span className="brandEarth">EARTH</span>
+        <span className="brandOnline"><i aria-hidden="true" />ONLINE</span>
       </b>
     </Link>
   );
@@ -109,11 +130,82 @@ function WalletLogo({ name }: { name: string }) {
     />
   );
 }
+
+function findWalletProvider(name: string): EthereumProvider | undefined {
+  const injected = window.ethereum;
+  const providers = injected?.providers?.length ? injected.providers : injected ? [injected] : [];
+  if (name === "Rabby") return providers.find((p) => p.isRabby);
+  if (name === "Coinbase Wallet") return providers.find((p) => p.isCoinbaseWallet);
+  if (name === "Phantom") return window.phantom?.ethereum ?? providers.find((p) => p.isPhantom);
+  if (name === "OKX Wallet") return window.okxwallet ?? providers.find((p) => p.isOkxWallet || p.isOKExWallet);
+  if (name === "MetaMask") return providers.find((p) => p.isMetaMask && !p.isRabby) ?? injected;
+  return undefined;
+}
+
+function publishConnectedAccount(address: string) {
+  if (address) window.localStorage.setItem("earth-account", address);
+  else window.localStorage.removeItem("earth-account");
+  window.dispatchEvent(new CustomEvent("earth-account-changed", { detail: address }));
+}
+
 function Shell({ children }: { children: React.ReactNode }) {
   const [wallet, setWallet] = useState(false),
-    [menu, setMenu] = useState(false);
+    [menu, setMenu] = useState(false),
+    [account, setAccount] = useState(""),
+    [connecting, setConnecting] = useState("");
   const path = usePathname(),
     router = useRouter();
+
+  useEffect(() => {
+    const walletName = window.localStorage.getItem("earth-wallet");
+    if (!walletName) return;
+    const provider = findWalletProvider(walletName);
+    if (!provider) return;
+    provider.request({ method: "eth_accounts" }).then((result) => {
+      const accounts = result as string[];
+      if (accounts?.[0]) {
+        setAccount(accounts[0]);
+        publishConnectedAccount(accounts[0]);
+      }
+    }).catch(() => undefined);
+    const handleAccounts = (accounts: unknown) => {
+      const nextAccount = (accounts as string[])?.[0] ?? "";
+      setAccount(nextAccount);
+      publishConnectedAccount(nextAccount);
+    };
+    provider.on?.("accountsChanged", handleAccounts);
+    return () => provider.removeListener?.("accountsChanged", handleAccounts);
+  }, []);
+
+  useEffect(() => {
+    const openWallet = () => setWallet(true);
+    window.addEventListener("earth-open-wallet", openWallet);
+    return () => window.removeEventListener("earth-open-wallet", openWallet);
+  }, []);
+
+  async function connectWallet(name: string) {
+    const provider = findWalletProvider(name);
+    if (!provider) {
+      toast.error(`${name} was not detected. Install or open its browser extension first.`);
+      return;
+    }
+    setConnecting(name);
+    try {
+      const result = await provider.request({ method: "eth_requestAccounts" });
+      const address = (result as string[])?.[0];
+      if (!address) throw new Error("No account was returned by the wallet.");
+      window.localStorage.setItem("earth-wallet", name);
+      setAccount(address);
+      publishConnectedAccount(address);
+      setWallet(false);
+      toast.success(`${name} connected`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Wallet connection was rejected.";
+      toast.error(message);
+    } finally {
+      setConnecting("");
+    }
+  }
   return (
     <>
       <header>
@@ -155,7 +247,7 @@ function Shell({ children }: { children: React.ReactNode }) {
           </div>
           <button className="dark" onClick={() => setWallet(true)}>
             <Wallet size={16} />
-            <span>Connect Wallet</span>
+            <span>{account ? `${account.slice(0, 6)}…${account.slice(-4)}` : "Connect Wallet"}</span>
           </button>
           <button
             className="menu"
@@ -186,18 +278,16 @@ function Shell({ children }: { children: React.ReactNode }) {
                 <X />
               </button>
             </div>
-            <p>Choose a wallet to enter EARTH//ONLINE.</p>
+            <p>Choose a wallet to enter EARTH ONLINE.</p>
             {["MetaMask", "Rabby", "Coinbase Wallet", "Phantom", "OKX Wallet"].map((w) => (
               <button
                 className="walletrow"
                 key={w}
-                onClick={() => {
-                  setWallet(false);
-                  toast.success(`${w} connected (demo)`);
-                }}
+                disabled={Boolean(connecting)}
+                onClick={() => connectWallet(w)}
               >
                 <WalletLogo name={w} />
-                <span>{w}</span>
+                <span>{connecting === w ? "Connecting…" : w}</span>
                 <ChevronRight size={16} />
               </button>
             ))}
@@ -271,6 +361,22 @@ function EmptyLaunchState() {
     </div>
   );
 }
+function VerifiedDataEmpty({
+  title,
+  text,
+}: {
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="emptylaunch">
+      <ShieldCheck />
+      <h3>{title}</h3>
+      <p>{text}</p>
+      <small>Only verified onchain records will be displayed here.</small>
+    </div>
+  );
+}
 function HeroArt() {
   return (
     <div className="art">
@@ -284,11 +390,9 @@ function HeroArt() {
         <b>6 cities ready to launch</b>
       </div>
       <div className="bigcoin">
-        <i>P</i>
-        <small>CITIZEN LEVEL</small>
-        <b>
-          METROPOLITAN <em>↑</em>
-        </b>
+        <i>E</i>
+        <small>$EARTH MAIN TOKEN</small>
+        <b>NOT LAUNCHED</b>
       </div>
       <div className="float mile">
         <div className="between">
@@ -371,6 +475,26 @@ function Home() {
             <small>CITY TOKENS</small>
             <strong>50% Buyback · 30% City · 20% Main</strong>
             <p>50% buys back $EARTH, 30% supports city creator community building, and 20% supports main-token creator community building.</p>
+          </div>
+        </section>
+        <section className="earthshowcase" aria-label="$EARTH main token">
+          <div className="earthidentity">
+            <div className="earthmark"><img src="/earth-token.png" alt="$EARTH token" /></div>
+            <div>
+              <label>MAIN ECOSYSTEM TOKEN</label>
+              <h2>$EARTH</h2>
+              <p>The reserve asset connecting every city economy.</p>
+            </div>
+          </div>
+          <div className="earthpending">
+            <span>NOT LAUNCHED</span>
+            <strong>Main token information will appear here.</strong>
+            <p>Verified contract, live price and market data will be shown after launch.</p>
+          </div>
+          <div className="earthplaceholders" aria-label="Main token data pending">
+            <div><small>CONTRACT</small><b>—</b></div>
+            <div><small>PRICE</small><b>—</b></div>
+            <div><small>MARKET CAP</small><b>—</b></div>
           </div>
         </section>
         <section className="market">
@@ -495,41 +619,18 @@ function Home() {
 function Launch() {
   const [region, setRegion] = useState<LaunchCity["region"]>("Europe"),
     [selectedTicker, setSelectedTicker] = useState(""),
-    [locallyLaunched, setLocallyLaunched] = useState<string[]>([]),
-    [done, setDone] = useState(false);
+    [launchAccount, setLaunchAccount] = useState("");
   useEffect(() => {
-    try {
-      setLocallyLaunched(JSON.parse(localStorage.getItem("earth-launched-cities-v2") || "[]"));
-    } catch {
-      setLocallyLaunched([]);
-    }
+    setLaunchAccount(localStorage.getItem("earth-account") || "");
+    const handleAccount = (event: Event) => setLaunchAccount((event as CustomEvent<string>).detail || "");
+    window.addEventListener("earth-account-changed", handleAccount);
+    return () => window.removeEventListener("earth-account-changed", handleAccount);
   }, []);
-  const published = new Set([...tokens.map((token) => token.ticker), ...locallyLaunched]);
+  const published = new Set(tokens.map((token) => token.ticker));
   const availableCities = launchCities.filter(
     (city) => city.region === region && !published.has(city.ticker),
   );
   const selectedCity = launchCities.find((city) => city.ticker === selectedTicker);
-  if (done)
-    return (
-      <Shell>
-        <main className="page">
-          <div className="success">
-            <i>
-              <Check />
-            </i>
-            <label>LAUNCH DRAFT READY</label>
-            <h1>City Launch Created</h1>
-            <p>Connect the city launch contract before publishing it onchain.</p>
-            <div className="buttons">
-              <Link className="dark" href="/token/0xgxp">
-                View Launch
-              </Link>
-              <button className="light">Share on X</button>
-            </div>
-          </div>
-        </main>
-      </Shell>
-    );
   return (
     <Shell>
       <main className="page">
@@ -542,10 +643,12 @@ function Launch() {
           onSubmit={(e) => {
             e.preventDefault();
             if (!selectedCity) return;
-            const next = [...new Set([...locallyLaunched, selectedCity.ticker])];
-            localStorage.setItem("earth-launched-cities-v2", JSON.stringify(next));
-            setLocallyLaunched(next);
-            setDone(true);
+            if (!launchAccount) {
+              window.dispatchEvent(new Event("earth-open-wallet"));
+              toast.error("Connect a wallet before launching a city token.");
+              return;
+            }
+            toast.error("The verified city launch contract is not configured. No transaction was submitted.");
           }}
         >
           <div className="formhead">
@@ -565,7 +668,7 @@ function Launch() {
           <div className="citypicker">
             {availableCities.map((city) => (
               <button type="button" key={city.ticker} className={selectedTicker === city.ticker ? "active" : ""} onClick={() => setSelectedTicker(city.ticker)}>
-                <span className="cityavatar" aria-hidden="true">{city.icon}</span>
+                <span className="cityavatar"><img src={city.icon} alt="" /></span>
                 <span><b>#{city.rank} {city.name}</b><small>{city.landmark}</small></span>
                 <strong>${city.ticker}</strong>
               </button>
@@ -574,7 +677,7 @@ function Launch() {
           </div>
           {selectedCity && (
             <div className="selectedcity">
-              <span className="cityavatar large" aria-hidden="true">{selectedCity.icon}</span>
+              <span className="cityavatar large"><img src={selectedCity.icon} alt={`${selectedCity.name} token avatar`} /></span>
               <div><small>AUTO-GENERATED TOKEN AVATAR</small><b>{selectedCity.name} · {selectedCity.landmark}</b></div>
               <Landmark />
             </div>
@@ -583,20 +686,14 @@ function Launch() {
             <label>City Name<input required readOnly value={selectedCity?.name || "Select a city above"} /></label>
             <label>Ticker<input required readOnly value={selectedCity ? `$${selectedCity.ticker}` : "Generated automatically"} /></label>
             <label className="full">
-              Description
+              Description <small>(Optional)</small>
               <textarea
-                required
                 placeholder="Describe the city community and how its treasury will be used..."
               />
             </label>
             <label>Region<input readOnly value={selectedCity?.region || region} /></label>
-            <Field name="Total Supply" placeholder="1000000000" />
             <Field name="Website" placeholder="https://" />
             <Field name="X / Twitter" placeholder="@handle" />
-            <label className="full">
-              City Creator DEV Wallet
-              <input required placeholder="0x... receives 30% of city-token fees" />
-            </label>
           </div>
           <div className="curvenote">
             <BarChart3 />
@@ -608,8 +705,15 @@ function Launch() {
             </p>
             <strong>50 / 30 / 20</strong>
           </div>
+          <div className={`launchwallet ${launchAccount ? "connected" : ""}`}>
+            <Wallet size={18} />
+            <div>
+              <b>{launchAccount ? "Creator wallet connected" : "Wallet required to launch"}</b>
+              <small>{launchAccount ? `${launchAccount.slice(0, 8)}…${launchAccount.slice(-6)} · receives the city creator's 30% fee share` : "The wallet that launches the city token receives its 30% creator fee share."}</small>
+            </div>
+          </div>
           <button className="dark submit" disabled={!selectedCity}>
-            {selectedCity ? `Launch $${selectedCity.ticker}` : "Choose a City to Continue"}
+            {!selectedCity ? "Choose a City to Continue" : !launchAccount ? "Connect Wallet to Launch" : "Verified Contract Required"}
             <ArrowRight />
           </button>
         </form>
@@ -620,8 +724,8 @@ function Launch() {
 function Field({ name, placeholder }: { name: string; placeholder: string }) {
   return (
     <label>
-      {name}
-      <input required placeholder={placeholder} />
+      {name} <small>(Optional)</small>
+      <input placeholder={placeholder} />
     </label>
   );
 }
@@ -654,7 +758,7 @@ function PointsProgram() {
         <section className="pointsnotes">
           <div><b>City specific</b><p>Every city token gives your wallet a separate local identity.</p></div>
           <div><b>Community access</b><p>Higher levels can unlock proposals, events and local benefits.</p></div>
-          <div><b>Always current</b><p>Your passport updates automatically as your city balance changes.</p></div>
+          <div><b>Onchain only</b><p>Levels will activate only after verified contract balances are indexed.</p></div>
         </section>
       </main>
     </Shell>
@@ -710,8 +814,8 @@ function Explore({ mile = false }: { mile?: boolean }) {
         </div>
         {mile ? (
           <div className="milegrid">
-            {[...milestones, ...milestones].map((m, i) => (
-              <Link href={`/token/0xm${i}`} className="milecard" key={i}>
+            {milestones.map((m, i) => (
+              <div className="milecard" key={m.ticker}>
                 <div className="between">
                   <small>#{i + 1}</small>
                   <strong>{m.progress}%</strong>
@@ -723,17 +827,13 @@ function Explore({ mile = false }: { mile?: boolean }) {
                 <div className="progress">
                   <i style={{ width: `${m.progress}%` }} />
                 </div>
-              </Link>
+              </div>
             ))}
             {!milestones.length && <EmptyLaunchState />}
           </div>
         ) : (
           <div className="grid explore">
-            {[...tokens, ...tokens, ...tokens.slice(0, 4)]
-              .flat()
-              .map((t, i) => (
-                <Card t={t} key={i} />
-              ))}
+            {tokens.map((t) => <Card t={t} key={t.address} />)}
             {!tokens.length && <EmptyLaunchState />}
           </div>
         )}
@@ -742,257 +842,60 @@ function Explore({ mile = false }: { mile?: boolean }) {
   );
 }
 function TokenPage() {
-  const [side, setSide] = useState("BUY"),
-    [amt, setAmt] = useState("0.5");
-  const projectedHolding = Math.floor(Number(amt || 0) * 24271);
-  const projectedTier = projectedHolding >= 250000 ? "Metropolitan" : projectedHolding >= 50000 ? "Citizen" : projectedHolding >= 10000 ? "Resident" : projectedHolding > 0 ? "Visitor" : "None";
-  const protocolFee = Number(amt || 0) * 0.01;
-  if (!tokens.length) {
-    return (
-      <Shell><main className="page"><EmptyLaunchState /></main></Shell>
-    );
-  }
   return (
     <Shell>
       <main className="page">
-        <div className="tokenhead">
-          <i className="coin" style={{ background: "#20A66A" }}>N</i>
-          <div>
-            <label>NORTH AMERICA · CITY TOKEN</label>
-            <h1>
-              New York City <span>$NYC</span>
-            </h1>
-            <p>Launched by 0x83...832 · Community wallet public</p>
-          </div>
-          <button className="light">
-            <Heart /> Watch
-          </button>
-        </div>
-        <div className="stats">
-          {[
-            ["Market Cap", "$12.4M"],
-            ["Price", "$0.0412"],
-            ["24H", "+128.5%"],
-            ["24H Volume", "$284.9K"],
-            ["Citizens", "4,821"],
-            ["Community Fund", "$142.4K"],
-          ].map((x) => (
-            <div key={x[0]}>
-              <small>{x[0]}</small>
-              <b>{x[1]}</b>
-            </div>
-          ))}
-        </div>
-        <div className="tradelayout">
-          <section className="chart">
-            <div className="between">
-              <div>
-                <small>NYC / ETH</small>
-                <h2>
-                  $0.00412 <span>+128.5%</span>
-                </h2>
-              </div>
-              <div className="tabs">
-                {["1M", "5M", "15M", "1H", "4H", "1D"].map((x) => (
-                  <button className={x === "1H" ? "active" : ""} key={x}>
-                    {x}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="bigchart">
-              <ResponsiveContainer>
-                <AreaChart
-                  data={[
-                    12, 17, 15, 24, 22, 30, 27, 38, 44, 39, 51, 58, 64, 75, 83,
-                  ].map((v) => ({ v }))}
-                >
-                  <Area
-                    dataKey="v"
-                    type="monotone"
-                    stroke="#5b8cff"
-                    strokeWidth={3}
-                    fill="#5b8cff"
-                    fillOpacity={0.13}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <div className="curve">
-              <div className="between">
-                <b>Bonding Curve</b>
-                <strong>68%</strong>
-              </div>
-              <div className="progress">
-                <i style={{ width: "68%" }} />
-              </div>
-              <small>$20,400 of $30,000 graduation market cap</small>
-            </div>
-          </section>
-          <aside className="trade">
-            <div className="tradetabs">
-              <button
-                className={side === "BUY" ? "active" : ""}
-                onClick={() => setSide("BUY")}
-              >
-                BUY
-              </button>
-              <button
-                className={side === "SELL" ? "active sell" : ""}
-                onClick={() => setSide("SELL")}
-              >
-                SELL
-              </button>
-            </div>
-            <label>
-              You pay <small>Balance: 2.84 ETH</small>
-              <div className="amount">
-                <input value={amt} onChange={(e) => setAmt(e.target.value)} />
-                <b>ETH</b>
-              </div>
-            </label>
-            <div className="quick">
-              {["0.1", "0.5", "1", "MAX"].map((x) => (
-                <button
-                  onClick={() => setAmt(x === "MAX" ? "2.84" : x)}
-                  key={x}
-                >
-                  {x}
-                </button>
-              ))}
-            </div>
-            <p className="receive">
-              <small>You receive</small>
-              <b>≈ {(Number(amt || 0) * 24271).toLocaleString()} NYC</b>
-            </p>
-            <div className="earnpreview">
-              <span><Sparkles size={16} /> Projected citizen level</span>
-              <strong>{projectedTier}</strong>
-              <small>Based on approximately {projectedHolding.toLocaleString()} NYC held after this purchase.</small>
-            </div>
-            <div className="feebreakdown">
-              <div><span>Protocol fee (1%)</span><b>{protocolFee.toFixed(4)} ETH</b></div>
-              <div><span>50% → $EARTH buyback</span><b>{(protocolFee / 2).toFixed(4)} ETH</b></div>
-              <div><span>30% → City creator community</span><b>{(protocolFee * .3).toFixed(4)} ETH</b></div>
-              <div><span>20% → Main-token creator community</span><b>{(protocolFee * .2).toFixed(4)} ETH</b></div>
-            </div>
-            <button
-              className={`dark submit ${side === "SELL" ? "danger" : ""}`}
-              onClick={() => toast.error("Connect the live trading contract to submit this transaction.")}
-            >
-              CONNECT CONTRACT TO {side} $NYC
-            </button>
-          </aside>
-        </div>
+        <Title
+          eyebrow="VERIFIED ONCHAIN DATA"
+          title="City Token"
+          text="This page does not have a verified deployed token contract to read yet."
+        />
+        <VerifiedDataEmpty
+          title="No verified token data"
+          text="Price, volume, holders, balances and trades will appear after a city token is launched through the deployed contract and indexed from chain."
+        />
       </main>
     </Shell>
   );
 }
 function Leaderboard() {
-  const [tab, setTab] = useState("CITIZENS");
-  if (!tokens.length) {
-    return (
-      <Shell><main className="page"><Title eyebrow="COMMUNITY SIGNAL" title="Leaderboard" text="Rankings begin after the first city token launches." /><EmptyLaunchState /></main></Shell>
-    );
-  }
   return (
     <Shell>
       <main className="page">
         <Title
           eyebrow="COMMUNITY SIGNAL"
           title="Leaderboard"
-          text="Discover the strongest city communities and their leading citizens."
+          text="Rankings are generated only from verified onchain balances and activity."
         />
-        <section className="leader">
-          <div className="tabs">
-            {["CITIZENS", "CITIES", "FOUNDERS"].map((x) => (
-              <button
-                className={tab === x ? "active" : ""}
-                onClick={() => setTab(x)}
-                key={x}
-              >
-                {x}
-              </button>
-            ))}
-          </div>
-          <div className="table">
-            <div className="row head">
-              <span>Rank</span>
-              <span>
-                {tab === "CITIZENS"
-                  ? "Wallet"
-                  : tab === "FOUNDERS"
-                    ? "Creator"
-                    : "Token"}
-              </span>
-              <span>Holdings</span>
-              <span>Level</span>
-              <span>Allocation</span>
-            </div>
-            {Array.from({ length: 10 }, (_, i) => {
-              const t = tokens[i % 8];
-              return (
-                <div className="row" key={i}>
-                  <span>#{i + 1}</span>
-                  <span className="who">
-                    <i style={{ background: t.color }}>{t.ticker[0]}</i>
-                    <b>
-                      {tab === "CITIZENS"
-                        ? `0x${83 + i}...${832 - i}`
-                        : tab === "FOUNDERS"
-                          ? `0x${93 + i}...${742 - i}`
-                          : t.name}
-                    </b>
-                    <small>
-                      {tab === "CITIZENS" ? `Citizen of ${t.name}` : `$${t.ticker}`}
-                    </small>
-                  </span>
-                  <span>{(284000 - i * 13000).toLocaleString()}</span>
-                  <span>{i < 2 ? "Metropolitan" : i < 5 ? "Citizen" : "Resident"}</span>
-                  <strong>{(2 - i * .08).toFixed(2)}×</strong>
-                </div>
-              );
-            })}
-          </div>
-        </section>
+        <VerifiedDataEmpty
+          title="No verified rankings yet"
+          text="The leaderboard will remain empty until launched city contracts have indexed holder and trading records."
+        />
       </main>
     </Shell>
   );
 }
 function Profile() {
-  if (!tokens.length) {
-    return (
-      <Shell><main className="page"><Title eyebrow="EARTH PASSPORT" title="No city activity yet" text="Connect your wallet after the first city launches." /><EmptyLaunchState /></main></Shell>
-    );
-  }
+  const [account, setAccount] = useState("");
+  useEffect(() => {
+    setAccount(localStorage.getItem("earth-account") || "");
+    const handleAccount = (event: Event) =>
+      setAccount((event as CustomEvent<string>).detail || "");
+    window.addEventListener("earth-account-changed", handleAccount);
+    return () => window.removeEventListener("earth-account-changed", handleAccount);
+  }, []);
   return (
     <Shell>
       <main className="page">
         <Title
           eyebrow="EARTH PASSPORT"
-          title="0x83...832"
-          text="Your city holdings, citizen identities and community treasury activity."
+          title={account ? `${account.slice(0, 8)}…${account.slice(-6)}` : "Wallet not connected"}
+          text={account ? "This connected wallet has no indexed city-token activity yet." : "Connect a wallet to view its verified onchain city activity."}
         />
-        <div className="stats">
-          {[
-            ["Portfolio Value", "$28.4K"],
-            ["Highest Level", "Citizen"],
-            ["Cities Joined", "12"],
-            ["Cities Launched", "2"],
-            ["Community Share", "$1,840"],
-            ["Wallet Status", "Connected"],
-          ].map((x) => (
-            <div key={x[0]}>
-              <small>{x[0]}</small>
-              <b>{x[1]}</b>
-            </div>
-          ))}
-        </div>
-        <div className="grid explore">
-          {tokens.slice(0, 5).map((t) => (
-            <Card key={t.ticker} t={t} />
-          ))}
-        </div>
+        <VerifiedDataEmpty
+          title={account ? "No verified wallet activity" : "Connect your wallet"}
+          text={account ? "Holdings, launches and fee distributions will appear only after they are read from deployed contracts." : "No portfolio values or balances are shown until a wallet and verified contracts are available."}
+        />
       </main>
     </Shell>
   );
@@ -1032,7 +935,7 @@ export default function App() {
         name: "start_token_launch",
         title: "Launch a city token",
         description:
-          "Open the EARTH//ONLINE launch flow for a city or district token.",
+          "Open the EARTH ONLINE launch flow for a city or district token.",
         inputSchema: {
           type: "object",
           properties: {

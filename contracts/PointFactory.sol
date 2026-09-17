@@ -75,19 +75,17 @@ contract PointFactory {
     function launchCityToken(
         bytes32 cityKey,
         string calldata imageURI,
-        string calldata description,
-        address communityWallet
+        string calldata description
     ) external payable returns (address tokenAddress) {
         City storage city = cities[cityKey];
         require(bytes(city.symbol).length != 0, "unknown city");
         require(!city.launched, "city already launched");
-        require(communityWallet != address(0), "community wallet");
         require(msg.value > 0, "curve seed");
 
         // Effects first: duplicate launches are blocked before external calls.
         city.launched = true;
         city.creator = msg.sender;
-        city.communityWallet = communityWallet;
+        city.communityWallet = msg.sender;
         city.launchedAt = uint64(block.timestamp);
 
         PointToken token = new PointToken(city.name, city.symbol, address(bondingCurve), CITY_TOKEN_SUPPLY);
@@ -96,13 +94,13 @@ contract PointFactory {
 
         bondingCurve.configureCity{value: msg.value}(
             tokenAddress,
-            communityWallet,
+            msg.sender,
             msg.value,
             CITY_TOKEN_SUPPLY
         );
 
         // Metadata is emitted for indexers without granting mutable token controls.
-        emit CityTokenLaunched(cityKey, tokenAddress, msg.sender, communityWallet, city.name, city.symbol, city.region);
+        emit CityTokenLaunched(cityKey, tokenAddress, msg.sender, msg.sender, city.name, city.symbol, city.region);
         emit CityMetadata(cityKey, imageURI, description, city.landmark);
     }
 
