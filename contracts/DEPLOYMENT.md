@@ -59,9 +59,10 @@ City creators call `PointFactory.launchCityToken{value: nativeSeed}(...)` from
 the wallet that should permanently receive the city community's 30% fee share.
 The factory rejects unknown cities and duplicate launches.
 
-Both EARTH and city-token curve buys/sells have an immutable 2% tax. All EARTH
-tax goes to the main community wallet for ecosystem development and city-token
-support. City-token tax is split 50% EARTH buyback / 30% city community / 20%
+EARTH curve buys/sells have an immutable 3% tax, while city-token curve
+buys/sells have an immutable 2% tax. All EARTH tax goes to the main community
+wallet for ecosystem development and city-token support. City-token tax is
+split 50% EARTH buyback / 30% city community / 20%
 main community. These percentages have no administrator setter. Minimum native trade value is immutable per deployment,
 all trade entry points are reentrancy guarded, user minimum-output protection is
 required, and distribution/trade/buyback events are emitted onchain.

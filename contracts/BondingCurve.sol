@@ -15,7 +15,8 @@ interface IEarthBuybackExecutor {
 
 contract BondingCurve {
     uint256 public constant BPS_DENOMINATOR = 10_000;
-    uint256 public constant TRADE_TAX_BPS = 200; // Fixed 2% buy/sell tax.
+    uint256 public constant EARTH_TRADE_TAX_BPS = 300; // Fixed 3% buy/sell tax.
+    uint256 public constant CITY_TRADE_TAX_BPS = 200; // Fixed 2% buy/sell tax.
     uint256 public constant CITY_BUYBACK_SHARE_BPS = 5_000;
     uint256 public constant CITY_DEV_SHARE_BPS = 3_000;
 
@@ -75,7 +76,7 @@ contract BondingCurve {
         owner = msg.sender;
     }
 
-    /// @notice EARTH 2% tax: 100% main community, for ecosystem development
+    /// @notice EARTH 3% tax: 100% main community, for ecosystem development
     /// and support of city-token communities.
     function setFactory(address factory_) external onlyOwner {
         require(factory == address(0), "factory already set");
@@ -110,7 +111,7 @@ contract BondingCurve {
 
     function getBuyPrice(address token, uint256 ethIn) public view returns (uint256) {
         _requireTradable(token);
-        uint256 netEthIn = ethIn - _tax(ethIn);
+        uint256 netEthIn = ethIn - _tax(token, ethIn);
         uint256 x = virtualEthReserve[token];
         uint256 y = virtualTokenReserve[token];
         return y - (x * y) / (x + netEthIn);
@@ -121,13 +122,13 @@ contract BondingCurve {
         uint256 x = virtualEthReserve[token];
         uint256 y = virtualTokenReserve[token];
         uint256 grossEthOut = x - (x * y) / (y + tokenIn);
-        return grossEthOut - _tax(grossEthOut);
+        return grossEthOut - _tax(token, grossEthOut);
     }
 
     function buy(address token, uint256 minTokenOut) external payable nonReentrant {
         _requireTradable(token);
         require(msg.value >= minimumNativeTrade, "below minimum trade");
-        uint256 tax = _tax(msg.value);
+        uint256 tax = _tax(token, msg.value);
         uint256 netEthIn = msg.value - tax;
         uint256 x = virtualEthReserve[token];
         uint256 y = virtualTokenReserve[token];
@@ -147,7 +148,7 @@ contract BondingCurve {
         uint256 y = virtualTokenReserve[token];
         uint256 grossEthOut = x - (x * y) / (y + tokenAmount);
         require(grossEthOut >= minimumNativeTrade, "below minimum trade");
-        uint256 tax = _tax(grossEthOut);
+        uint256 tax = _tax(token, grossEthOut);
         uint256 netEthOut = grossEthOut - tax;
         require(netEthOut >= minEthOut && netEthOut > 0, "slippage");
         require(IERC20Lite(token).transferFrom(msg.sender, address(this), tokenAmount), "token transfer");
@@ -206,7 +207,12 @@ contract BondingCurve {
         emit CommunityFeesClaimed(msg.sender, recipient, amount);
     }
 
-    function _tax(uint256 amount) internal pure returns (uint256) { return amount * TRADE_TAX_BPS / BPS_DENOMINATOR; }
+    function _tax(address token, uint256 amount) internal view returns (uint256) {
+        uint256 rate = tokenConfig[token].tokenType == TokenType.Earth
+            ? EARTH_TRADE_TAX_BPS
+            : CITY_TRADE_TAX_BPS;
+        return amount * rate / BPS_DENOMINATOR;
+    }
 
     function _requireTradable(address token) internal view {
         require(tokenConfig[token].tokenType != TokenType.Unconfigured, "unconfigured");

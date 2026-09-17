@@ -494,7 +494,7 @@ function Home() {
           <div className="splitcard buyback">
             <small>$EARTH MAIN TOKEN</small>
             <strong>100% Ecosystem Community</strong>
-            <p>The fixed 2% fee funds community building and support programs for city-token communities.</p>
+            <p>The fixed 3% fee funds community building and support programs for city-token communities.</p>
           </div>
           <ArrowRight className="splitarrow" />
           <div className="splitcard community">

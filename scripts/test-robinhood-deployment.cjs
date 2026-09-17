@@ -13,7 +13,8 @@ async function main() {
   const earth = await hre.ethers.getContractAt("EarthToken", earthAddress);
   const curve = await hre.ethers.getContractAt("BondingCurve", curveAddress);
 
-  if (await curve.TRADE_TAX_BPS() !== 200n) throw new Error("tax is not fixed at 2%");
+  if (await curve.EARTH_TRADE_TAX_BPS() !== 300n) throw new Error("EARTH tax is not fixed at 3%");
+  if (await curve.CITY_TRADE_TAX_BPS() !== 200n) throw new Error("city tax is not fixed at 2%");
   if (await curve.mainDevWallet() !== wallet.address) throw new Error("community wallet mismatch");
   if (await earth.balanceOf(wallet.address) !== hre.ethers.parseEther("100000000")) throw new Error("treasury allocation mismatch");
 
@@ -21,7 +22,7 @@ async function main() {
   const quote = await curve.getBuyPrice(earthAddress, hre.ethers.parseEther("0.0001"));
   await (await curve.buy(earthAddress, quote * 99n / 100n, { value: hre.ethers.parseEther("0.0001") })).wait();
   if (await earth.balanceOf(wallet.address) <= hre.ethers.parseEther("100000000")) throw new Error("buy failed");
-  if ((await curve.claimableCommunityFees(wallet.address)) - claimBeforeEarthTrade !== hre.ethers.parseEther("0.000002")) throw new Error("EARTH community fee mismatch");
+  if ((await curve.claimableCommunityFees(wallet.address)) - claimBeforeEarthTrade !== hre.ethers.parseEther("0.000003")) throw new Error("EARTH community fee mismatch");
   if (await curve.pendingBuybackNative() !== 0n) throw new Error("EARTH fees must not enter buyback");
 
   const factoryContract = await hre.ethers.getContractAt("PointFactory", cityFactoryAddress);
