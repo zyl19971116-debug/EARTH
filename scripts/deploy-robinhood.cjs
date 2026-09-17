@@ -34,7 +34,7 @@ async function main() {
   const buybackRecipient = requiredAddress("BUYBACK_RECIPIENT", configuredWallets.buybackRecipient);
   const dexRouter = requiredAddress("ROBINHOOD_DEX_ROUTER", UNISWAP_V2_ROUTER);
   const wrappedNative = requiredAddress("ROBINHOOD_WRAPPED_NATIVE", WETH);
-  const treasury = requiredAddress("EARTH_TREASURY", configuredWallets.earthTreasury);
+  const earthToken = requiredAddress("PONS_EARTH_TOKEN_ADDRESS");
 
   const graduationCap = hre.ethers.parseEther(process.env.GRADUATION_MARKET_CAP_ETH || "30");
   const minimumTrade = hre.ethers.parseEther(process.env.MINIMUM_TRADE_ETH || "0.001");
@@ -45,17 +45,18 @@ async function main() {
 
   if ((await hre.ethers.provider.getCode(dexRouter)) === "0x") throw new Error("DEX router has no mainnet code");
   if ((await hre.ethers.provider.getCode(wrappedNative)) === "0x") throw new Error("WETH has no mainnet code");
+  if ((await hre.ethers.provider.getCode(earthToken)) === "0x") throw new Error("Pons EARTH token has no mainnet code");
   const router = new hre.ethers.Contract(dexRouter, ["function WETH() view returns (address)"], hre.ethers.provider);
   const routerWeth = await router.WETH();
   if (routerWeth.toLowerCase() !== wrappedNative.toLowerCase()) throw new Error("Router WETH mismatch");
   console.log(`Verified Uniswap V2 Router02: ${dexRouter}`);
   console.log(`Verified WETH: ${wrappedNative}`);
+  console.log(`Verified Pons EARTH token: ${earthToken}`);
 
-  const earth = await deploy("EarthToken", [treasury]);
   const buyback = await deploy("EarthBuybackExecutor", [dexRouter, wrappedNative, slippageBps]);
   const curve = await deploy("BondingCurve", [
     graduationCap,
-    await earth.getAddress(),
+    earthToken,
     mainCommunityWallet,
     await buyback.getAddress(),
     buybackRecipient,
@@ -68,10 +69,10 @@ async function main() {
 
   console.log("Wiring complete.");
   console.log("NEXT_PUBLIC_ROBINHOOD_CHAIN_ID=" + network.chainId);
-  console.log("NEXT_PUBLIC_EARTH_TOKEN_ADDRESS=" + await earth.getAddress());
+  console.log("NEXT_PUBLIC_EARTH_TOKEN_ADDRESS=" + earthToken);
   console.log("NEXT_PUBLIC_BONDING_CURVE_ADDRESS=" + await curve.getAddress());
   console.log("NEXT_PUBLIC_POINT_FACTORY_ADDRESS=" + await factory.getAddress());
-  console.log("Important: seed EARTH liquidity and confirm a live EARTH/WETH route before enabling trading.");
+  console.log("Important: confirm the Pons EARTH/WETH pool and deploy the matching buyback adapter before enabling city trading.");
 }
 
 main().catch((error) => {

@@ -44,26 +44,24 @@ contract, it checks that both addresses contain code and that the router's
 
 ## Deployment order performed by the script
 
-1. `EarthToken(treasury)`
-2. `EarthBuybackExecutor(router, wrappedNative, slippageBps)`
-3. `BondingCurve(cap, earthToken, mainCommunityWallet, buybackExecutor,
-   buybackRecipient, minimumNativeTrade)`
-4. `PointFactory(bondingCurve)`
-5. One-time wiring of the executor and factory.
+`$EARTH` is launched separately through Pons. Set its immutable mainnet token
+address as `PONS_EARTH_TOKEN_ADDRESS`; the script verifies that it contains
+contract bytecode and never deploys a replacement main token.
 
-After deployment, transfer the EARTH reserve into `BondingCurve`, then call
-`configureEarth{value: nativeSeed}(nativeSeed, earthTokenReserve)`. This call
-verifies that the token reserve is actually funded.
+1. `EarthBuybackExecutor(router, wrappedNative, slippageBps)`
+2. `BondingCurve(cap, Pons EARTH token, mainCommunityWallet, buybackExecutor,
+   buybackRecipient, minimumNativeTrade)`
+3. `PointFactory(bondingCurve)`
+4. One-time wiring of the executor and factory.
 
 City creators call `PointFactory.launchCityToken{value: nativeSeed}(...)` from
 the wallet that should permanently receive the city community's 30% fee share.
 The factory rejects unknown cities and duplicate launches.
 
-EARTH curve buys/sells have an immutable 3% tax, while city-token curve
-buys/sells have an immutable 2% tax. All EARTH tax goes to the main community
-wallet for ecosystem development and city-token support. City-token tax is
-split 50% EARTH buyback / 30% city community / 20%
-main community. These percentages have no administrator setter. Minimum native trade value is immutable per deployment,
+Pons controls EARTH supply, trading and main-token fees. City-token curve
+buys/sells have an immutable 2% tax split 50% EARTH buyback / 30% city
+community / 20% main community. These percentages have no administrator
+setter. Minimum native trade value is immutable per deployment,
 all trade entry points are reentrancy guarded, user minimum-output protection is
 required, and distribution/trade/buyback events are emitted onchain.
 

@@ -493,8 +493,8 @@ function Home() {
           </div>
           <div className="splitcard buyback">
             <small>$EARTH MAIN TOKEN</small>
-            <strong>100% Ecosystem Community</strong>
-            <p>The fixed 3% fee funds community building and support programs for city-token communities.</p>
+            <strong>Launched through Pons</strong>
+            <p>Main-token supply, trading pool and fees follow the immutable Pons launch configuration.</p>
           </div>
           <ArrowRight className="splitarrow" />
           <div className="splitcard community">
