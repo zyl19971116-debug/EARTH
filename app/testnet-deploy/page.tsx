@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { BrowserProvider, ContractFactory, formatEther, parseEther } from "ethers";
+import { BrowserProvider, Contract, ContractFactory, formatEther, keccak256, parseEther, toUtf8Bytes } from "ethers";
 import deploymentArtifact from "../../artifacts/contracts/RobinhoodTestDeployment.sol/RobinhoodTestDeployment.json";
+import factoryArtifact from "../../artifacts/contracts/PointFactory.sol/PointFactory.json";
 
 type InjectedProvider = {
   request(args: { method: string; params?: unknown[] }): Promise<unknown>;
@@ -16,11 +17,14 @@ const chain = {
   rpcUrls: ["https://rpc.testnet.chain.robinhood.com"],
   blockExplorerUrls: ["https://explorer.testnet.chain.robinhood.com"],
 };
+const activeTestDeployment = "0xf8F587be20c6fBB6Fb79Dc0866EC779f440E3c9f";
+const activePointFactory = "0x61F35B81333792ACa98a92a0207B622E2DC43d2F";
 
 export default function TestnetDeploy() {
   const [status, setStatus] = useState("Connect the funded wallet to begin."),
     [account, setAccount] = useState(""),
     [deployment, setDeployment] = useState(""),
+    [cityToken, setCityToken] = useState(""),
     [busy, setBusy] = useState(false);
 
   async function connect() {
@@ -37,6 +41,43 @@ export default function TestnetDeploy() {
     setAccount(accounts[0]);
     setStatus("Wallet connected. Review the testnet warning before deploying.");
     return accounts[0];
+  }
+
+  async function launchFirstCity() {
+    setBusy(true);
+    try {
+      const selected = account || await connect();
+      const injected = (window as unknown as { ethereum?: InjectedProvider }).ethereum;
+      if (!injected) throw new Error("Wallet provider unavailable.");
+      const provider = new BrowserProvider(injected);
+      if ((await provider.getNetwork()).chainId !== BigInt(46630)) throw new Error("Wallet is not on Robinhood Chain Testnet.");
+      const signer = await provider.getSigner();
+      if ((await signer.getAddress()).toLowerCase() !== selected.toLowerCase()) throw new Error("Connected account changed. Reconnect and try again.");
+      const factory = new Contract(activePointFactory, factoryArtifact.abi, signer);
+      const cityKey = keccak256(toUtf8Bytes("IST"));
+      const city = await factory.getCity(cityKey);
+      if (city.launched) {
+        setCityToken(city.token);
+        setStatus("Istanbul is already launched on this test deployment.");
+        return;
+      }
+      setStatus("Confirm the Istanbul TESTNET launch transaction in your wallet.");
+      const tx = await factory.launchCityToken(
+        cityKey,
+        "/cities/istanbul.png",
+        "EARTH ONLINE first Robinhood testnet city",
+        { value: parseEther("0.0001") },
+      );
+      setStatus("City launch submitted. Waiting for testnet confirmation…");
+      await tx.wait();
+      const launchedCity = await factory.getCity(cityKey);
+      setCityToken(launchedCity.token);
+      setStatus("Istanbul city token launched successfully on testnet.");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "City launch failed or was rejected.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function deploy() {
@@ -82,6 +123,17 @@ export default function TestnetDeploy() {
         {deployment && <p><b>Deployment:</b> <a href={`https://explorer.testnet.chain.robinhood.com/address/${deployment}`} target="_blank" rel="noreferrer">{deployment}</a></p>}
         <button disabled={busy} onClick={deploy} style={{ border: 0, borderRadius: 12, padding: "15px 22px", background: "#0c241c", color: "white", fontWeight: 800, cursor: "pointer" }}>
           {busy ? "Waiting for wallet…" : account ? "Deploy Test Contracts" : "Connect Wallet & Deploy"}
+        </button>
+      </div>
+      <div style={{ padding: 20, marginTop: 20, border: "1px solid #d8dfdc", borderRadius: 16 }}>
+        <h2>Test the first city launch</h2>
+        <p><b>City:</b> Istanbul · $IST</p>
+        <p><b>Factory:</b> {activePointFactory}</p>
+        <p><b>Initial city seed:</b> 0.0001 test ETH</p>
+        <p><b>Active deployment:</b> {activeTestDeployment}</p>
+        {cityToken && <p><b>City token:</b> <a href={`https://explorer.testnet.chain.robinhood.com/address/${cityToken}`} target="_blank" rel="noreferrer">{cityToken}</a></p>}
+        <button disabled={busy} onClick={launchFirstCity} style={{ border: 0, borderRadius: 12, padding: "15px 22px", background: "#14a36d", color: "white", fontWeight: 800, cursor: "pointer" }}>
+          {busy ? "Waiting for wallet…" : "Launch Istanbul Test Token"}
         </button>
       </div>
     </main>
