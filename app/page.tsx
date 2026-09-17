@@ -436,7 +436,7 @@ function HeroArt() {
         <b>6 cities ready to launch</b>
       </div>
       <div className="bigcoin">
-        <i>E</i>
+        <img src="/earth-token.png" alt="$EARTH logo" />
         <small>$EARTH MAIN TOKEN</small>
         <b>NOT LAUNCHED</b>
       </div>
