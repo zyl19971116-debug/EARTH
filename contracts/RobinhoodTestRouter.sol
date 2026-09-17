@@ -24,6 +24,26 @@ contract RobinhoodTestRouter {
         swapsEnabled = enabled;
     }
 
+    // Pons V2 curve-compatible surface used by the production buyback adapter.
+    function token() external view returns (address) { return earthToken; }
+    function isNativeQuote() external pure returns (bool) { return true; }
+    function graduated() external pure returns (bool) { return false; }
+    function getReserves() external pure returns (uint256, uint256) { return (1 ether, 10_000 ether); }
+    function sellableTokens() external pure returns (uint256) { return 10_000 ether; }
+    function feeBps() external pure returns (uint256) { return 0; }
+    function creatorTaxBps() external pure returns (uint256) { return 0; }
+    function currentSnipeTaxBps(address) external pure returns (uint256) { return 0; }
+
+    function buy(uint256 quoteIn, uint256 minTokensOut, address recipient)
+        external payable returns (uint256 tokensOut)
+    {
+        require(swapsEnabled, "test swap disabled");
+        require(msg.value == quoteIn, "quote value");
+        tokensOut = quoteIn * 10_000 ether / (1 ether + quoteIn);
+        require(tokensOut >= minTokensOut, "minimum output");
+        require(ITestEarthToken(earthToken).transfer(recipient, tokensOut), "earth transfer");
+    }
+
     function getAmountsOut(uint256 amountIn, address[] calldata path)
         external view returns (uint256[] memory amounts)
     {

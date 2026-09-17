@@ -11,9 +11,9 @@ Robinhood Chain is EVM-compatible and uses ETH for gas.
 
 1. Deploy and test on Robinhood Chain Testnet first.
 2. Independently audit all contracts before mainnet use.
-3. Confirm the DEX router and wrapped-native addresses from authoritative sources.
-4. Create the EARTH/WETH liquidity route before enabling trades. The buyback
-   executor deliberately reverts when no valid route or minimum output exists.
+3. Confirm the Pons token and curve addresses from the official source and chain explorer.
+4. Confirm that EARTH has not graduated before deployment. The current adapter
+   trades against its native-quoted Pons V2 curve; failed buys are deferred.
 5. Keep the deployer private key outside the repository.
 
 ## Configuration
@@ -38,11 +38,10 @@ npm run contracts:compile
 npm run contracts:deploy:robinhood
 ```
 
-The production script defaults to the official Robinhood Chain Uniswap V2
-Router02 `0x89e5db8b5aa49aa85ac63f691524311aeb649eba` and WETH
-`0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73`. Before deploying any EARTH
-contract, it checks that both addresses contain code and that the router's
-`WETH()` result matches the configured wrapped-native address.
+The production script pins EARTH to token
+`0xd9731Ac1557fb22c5b51b348aA06CA73B920b9c2` and its Pons V2 curve
+`0x14ee0C70DF1f2A9eBA9aA375B1880fBD63911306`. It verifies bytecode, token/curve
+association, native quote asset and graduation state before deployment.
 
 ## Deployment order performed by the script
 
@@ -50,7 +49,7 @@ contract, it checks that both addresses contain code and that the router's
 address as `PONS_EARTH_TOKEN_ADDRESS`; the script verifies that it contains
 contract bytecode and never deploys a replacement main token.
 
-1. `EarthBuybackExecutor(router, wrappedNative, slippageBps)`
+1. `EarthBuybackExecutor(Pons EARTH token, Pons EARTH curve, slippageBps)`
 2. `BondingCurve(cap, Pons EARTH token, mainCommunityWallet, buybackExecutor,
    buybackRecipient, minimumNativeTrade)`
 3. `PointFactory(bondingCurve)`
@@ -77,7 +76,7 @@ withdraw. A recipient that cannot receive ETH therefore cannot block trading.
 The website renders the claim control only when the connected address matches a
 launched city's immutable creator address.
 
-Buybacks are attempted during each trade. If the DEX route, liquidity or
+Buybacks are attempted during each trade. If the Pons curve, liquidity or
 slippage check fails, the trade continues and the 50% buyback share is recorded
 in `pendingBuybackNative`. Anyone can later call `executePendingBuyback` for a
 partial or full pending amount. A failed retry leaves the pending balance intact.
@@ -89,6 +88,11 @@ only when the balance is non-zero. Configure `BUYBACK_KEEPER_PRIVATE_KEY`,
 Vercel environment values, and add the same `CRON_SECRET` as a GitHub Actions
 secret. Never commit the keeper private key. The keeper wallet needs only enough
 native currency for gas and does not custody protocol fees.
+
+If EARTH graduates to Uniswap V4, new city trades keep working and their
+buyback shares accumulate in `pendingBuybackNative`; they must not be retried
+until a separately reviewed V4 adapter/migration is deployed. No administrator
+can silently redirect this executor to a different market.
 
 The tax applies to trades executed through `BondingCurve`. Plain ERC-20 wallet
 transfers or unrelated third-party markets are not taxed by this architecture.

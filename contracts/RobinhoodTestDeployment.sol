@@ -44,7 +44,7 @@ contract RobinhoodTestDeployment {
 
         EarthToken earth = new EarthToken(address(this));
         RobinhoodTestRouter router = new RobinhoodTestRouter(address(earth));
-        EarthBuybackExecutor executor = new EarthBuybackExecutor(address(router), address(1), 500);
+        EarthBuybackExecutor executor = new EarthBuybackExecutor(address(earth), address(router), 500);
         BondingCurve curve = new BondingCurve(
             30 ether,
             address(earth),

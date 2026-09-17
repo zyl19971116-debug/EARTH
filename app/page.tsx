@@ -21,7 +21,13 @@ import {
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { toast, Toaster } from "sonner";
 import { usePathname, useRouter } from "next/navigation";
+import { BrowserProvider, Contract, JsonRpcProvider, keccak256, toUtf8Bytes } from "ethers";
 import CommunityFeeClaim from "@/components/CommunityFeeClaim";
+
+const EARTH_TOKEN_ADDRESS = "0xd9731Ac1557fb22c5b51b348aA06CA73B920b9c2";
+const PONS_EARTH_URL = `https://www.ponsfamily.com/launchpad/${EARTH_TOKEN_ADDRESS}`;
+const EXPLORER_TOKEN_URL = `https://robinhoodchain.blockscout.com/token/${EARTH_TOKEN_ADDRESS}`;
+const POINT_FACTORY_ADDRESS = process.env.NEXT_PUBLIC_POINT_FACTORY_ADDRESS || "";
 
 type EthereumProvider = {
   request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
@@ -438,7 +444,7 @@ function HeroArt() {
       <div className="bigcoin">
         <img src="/earth-token.png" alt="$EARTH logo" />
         <small>$EARTH MAIN TOKEN</small>
-        <b>NOT LAUNCHED</b>
+        <b>LIVE ON PONS</b>
       </div>
       <div className="float mile">
         <div className="between">
@@ -533,14 +539,14 @@ function Home() {
             </div>
           </div>
           <div className="earthpending">
-            <span>NOT LAUNCHED</span>
-            <strong>Main token information will appear here.</strong>
-            <p>Verified contract, live price and market data will be shown after launch.</p>
+            <span>LIVE · ROBINHOOD CHAIN</span>
+            <strong>Earth online Launch</strong>
+            <p>Issued through Pons V2 and verified directly onchain.</p>
           </div>
-          <div className="earthplaceholders" aria-label="Main token data pending">
-            <div><small>CONTRACT</small><b>—</b></div>
-            <div><small>PRICE</small><b>—</b></div>
-            <div><small>MARKET CAP</small><b>—</b></div>
+          <div className="earthplaceholders" aria-label="Verified main token data">
+            <a href={EXPLORER_TOKEN_URL} target="_blank" rel="noreferrer"><small>CONTRACT</small><b>{EARTH_TOKEN_ADDRESS.slice(0, 6)}…{EARTH_TOKEN_ADDRESS.slice(-4)}</b></a>
+            <div><small>TOTAL SUPPLY</small><b>1B</b></div>
+            <a href={PONS_EARTH_URL} target="_blank" rel="noreferrer"><small>TRADE</small><b>Pons ↗</b></a>
           </div>
         </section>
         <section className="market">
@@ -667,13 +673,28 @@ function Launch() {
     [selectedTicker, setSelectedTicker] = useState(""),
     [launchAccount, setLaunchAccount] = useState(() =>
       typeof window === "undefined" ? "" : localStorage.getItem("earth-account") || "",
-    );
+    ),
+    [contractReady, setContractReady] = useState(false),
+    [launching, setLaunching] = useState(false),
+    [launchedTickers, setLaunchedTickers] = useState<Set<string>>(new Set());
   useEffect(() => {
     const handleAccount = (event: Event) => setLaunchAccount((event as CustomEvent<string>).detail || "");
     window.addEventListener("earth-account-changed", handleAccount);
     return () => window.removeEventListener("earth-account-changed", handleAccount);
   }, []);
-  const published = new Set(tokens.map((token) => token.ticker));
+  useEffect(() => {
+    if (!POINT_FACTORY_ADDRESS) return;
+    const factory = new Contract(POINT_FACTORY_ADDRESS, [
+      "function mainTokenBound() view returns(bool)",
+      "function mainToken() view returns(address)",
+      "function getAllCities() view returns((string name,string symbol,string region,string landmark,uint8 populationRank,bool launched,address token,address creator,address communityWallet,uint64 launchedAt)[])",
+    ], new JsonRpcProvider(ROBINHOOD_CHAIN.rpcUrls[0]));
+    Promise.all([factory.mainTokenBound(), factory.mainToken(), factory.getAllCities()]).then(([bound, token, cities]) => {
+      setContractReady(Boolean(bound) && String(token).toLowerCase() === EARTH_TOKEN_ADDRESS.toLowerCase());
+      setLaunchedTickers(new Set((cities as Array<{ symbol: string; launched: boolean }>).filter((city) => city.launched).map((city) => city.symbol)));
+    }).catch(() => setContractReady(false));
+  }, []);
+  const published = launchedTickers;
   const availableCities = launchCities.filter(
     (city) => city.region === region && !published.has(city.ticker),
   );
@@ -687,7 +708,7 @@ function Launch() {
           text="Put any city onchain and open its community-owned market."
         />
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             if (!selectedCity) return;
             if (!launchAccount) {
@@ -695,7 +716,31 @@ function Launch() {
               toast.error("Connect a wallet before launching a city token.");
               return;
             }
-            toast.error("The verified city launch contract is not configured. No transaction was submitted.");
+            if (!contractReady || !POINT_FACTORY_ADDRESS) return toast.error("The city factory is not deployed and bound to $EARTH on mainnet yet.");
+            const injected = findWalletProvider(localStorage.getItem("earth-wallet") || "MetaMask");
+            if (!injected) return toast.error("Connected wallet provider was not found.");
+            try {
+              setLaunching(true);
+              await ensureRobinhoodChain(injected);
+              const signer = await new BrowserProvider(injected as never).getSigner();
+              const factory = new Contract(POINT_FACTORY_ADDRESS, ["function launchCityToken(bytes32,string,string) payable returns(address)"], signer);
+              const data = new FormData(e.currentTarget);
+              const tx = await factory.launchCityToken(
+                keccak256(toUtf8Bytes(selectedCity.ticker)),
+                selectedCity.icon,
+                String(data.get("description") || ""),
+                { value: 1000000000000000n },
+              );
+              toast.info("City launch submitted. Waiting for confirmation…");
+              await tx.wait();
+              setLaunchedTickers((current) => new Set([...current, selectedCity.ticker]));
+              setSelectedTicker("");
+              toast.success(`${selectedCity.name} token launched successfully.`);
+            } catch (error) {
+              toast.error(error instanceof Error ? error.message : "City launch failed.");
+            } finally {
+              setLaunching(false);
+            }
           }}
         >
           <div className="formhead">
@@ -735,6 +780,7 @@ function Launch() {
             <label className="full">
               Description <small>(Optional)</small>
               <textarea
+                name="description"
                 placeholder="Describe the city community and how its treasury will be used..."
               />
             </label>
@@ -759,8 +805,8 @@ function Launch() {
               <small>{launchAccount ? `${launchAccount.slice(0, 8)}…${launchAccount.slice(-6)} · receives the city creator's 30% fee share` : "The wallet that launches the city token receives its 30% creator fee share."}</small>
             </div>
           </div>
-          <button className="dark submit" disabled={!selectedCity}>
-            {!selectedCity ? "Choose a City to Continue" : !launchAccount ? "Connect Wallet to Launch" : "Pons $EARTH Binding Required"}
+          <button className="dark submit" disabled={!selectedCity || launching}>
+            {!selectedCity ? "Choose a City to Continue" : !launchAccount ? "Connect Wallet to Launch" : launching ? "Launching…" : contractReady ? "Launch City Token" : "Mainnet Factory Deployment Required"}
             <ArrowRight />
           </button>
         </form>
